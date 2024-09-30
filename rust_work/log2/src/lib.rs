@@ -1,5 +1,8 @@
-//
+// logrotation with log4rs
 // https://github.com/estk/log4rs/blob/main/examples/log_to_file_with_rolling.rs ,
+
+// $ cd /path/to/mymodule  # package directory with cargo.toml
+// $ cargo add log4rs log  # it will add dependencies and edit cargo.toml
 
 pub use log::{debug, error, info, trace, warn};
 use log::{LevelFilter, SetLoggerError};
@@ -67,6 +70,35 @@ pub fn init_logging(dir: &str, name: &str) -> Result<(), SetLoggerError> {
     let _handle = log4rs::init_config(config)?;
     Ok(())
 }
+
+/*
+
+// workspace/members: "log2"
+// package/dependencies: log2 = {path = "../log2"}
+
+$ cat main.rs
+
+use log2::init_logging;
+use log2::{debug, error, info, trace, warn};
+
+fn main() {
+    let dir = "./logs";
+    let name = "foo";
+    init_logging(dir, name);
+
+    // Generate some log messages to trigger rolling
+    loop {
+        error!("This is error message!");
+        warn!("This is warn message!");
+        info!("This is info message!");
+        debug!("This is debug message!");
+        trace!("This is trace message!");
+    }
+}
+
+$
+
+*/
 
 //
 

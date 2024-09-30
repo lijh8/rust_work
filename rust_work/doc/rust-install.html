@@ -1,0 +1,1052 @@
+<html>
+
+<head>
+    <style>
+        /* https://developer.mozilla.org/en-US/docs/Web/CSS/color-scheme */
+        :root {
+            color-scheme: light dark
+        }
+    </style>
+</head>
+
+<body>
+
+    <textarea disabled style="
+    border: none;
+    font-family: monospace;
+    font-size: inherit;
+    height: 100%;
+    overflow-wrap: break-word;
+    resize: none;
+    width: 100%;">
+
+
+Rust install
+
+Rust mirror:
+
+$ vi ~/.profile
+export RUSTUP_UPDATE_ROOT=https://mirrors.tuna.tsinghua.edu.cn/rustup/rustup
+export RUSTUP_DIST_SERVER=https://mirrors.tuna.tsinghua.edu.cn/rustup
+. "$HOME/.cargo/env"
+$
+$ source ~/.profile
+
+Cargo mirror:
+
+$ vi ~/.cargo/config.toml
+[source.crates-io]
+replace-with = 'tuna'
+[source.tuna]
+registry = "https://mirrors.tuna.tsinghua.edu.cn/git/crates.io-index.git"
+$
+$ rm ~/.cargo/.package-cache
+
+
+---
+
+
+$ sudo apt install build-essential
+$ sudo apt install curl
+
+$ source ~/.profile
+$ curl --proto '=https' --tlsv1.2 https://sh.rustup.rs -sSf | sh
+
+$ source "$HOME/.cargo/env"
+$ rustc --version
+
+$ rustup update stable
+$ cargo update  # in project directory with Cargo.toml
+
+$ rustup doc --book
+$ rustup self uninstall
+
+## install dir:
+/Users/ljh/.rustup ,
+/Users/ljh/.cargo/bin ,
+
+## profile:
+/Users/ljh/.profile ,
+/Users/ljh/.zshenv ,
+/Users/ljh/.cargo/env ,
+
+## with homebrew on macOS:
+$ brew install rustup-init
+$ rustup-init
+$ brew update
+
+
+---
+
+
+https://doc.rust-lang.org/book/ ,
+https://doc.rust-lang.org/std/ ,
+https://crates.io ,
+https://docs.rs ,
+
+
+---
+
+
+// https://github.com/rust-lang/rustfmt ,
+// https://github.com/rust-lang/rustfmt/blob/master/Configurations.md ,
+
+$ cd ~  # $HOME, or workspace package root dir
+$ rustfmt  --print-config  default  rustfmt.toml
+$ vi rustfmt.toml
+disable_all_formatting = true
+ignore = [
+    "src",
+    "/",
+]
+$
+
+
+---
+
+
+VSCode extensions:
+matklad.rust-analyzer,
+vadimcn.vscode-lldb,
+
+VSCode settings:
+  "rust-analyzer.hover.actions.enable": false,
+  "rust-analyzer.inlayHints.typeHints.enable": true,
+  "rust-analyzer.lens.enable": false,
+
+
+---
+
+
+Coding style:
+
+https://github.com/rust-dev-tools/fmt-rfcs/blob/master/guide/guide.md ,
+https://github.com/rust-dev-tools/fmt-rfcs ,
+https://rustc-dev-guide.rust-lang.org/conventions.html ,
+
+
+---
+
+
+Create workspace and module:
+
+$ cd ~
+$ mkdir work
+$ cd ~/work
+$ vi Cargo.toml
+[workspace]
+resolver = "2"
+members = [
+    "hello_app",
+    "hello_lib",
+]
+$ cargo new hello_app
+$ cargo new hello_lib --lib
+
+// https://doc.rust-lang.org/cargo/reference/specifying-dependencies.html#multiple-locations ,
+
+# add dependencies by editing cargo.toml
+$ vi ~/work/hello_app/Cargo.toml
+[dependencies]
+hello_lib = { path = "../hello_lib", version = "0.1.0" }
+$
+
+# or use cargo add command
+$ cargo add log  # from crates.io
+$ cat ~/work/hello_app/Cargo.toml
+[dependencies]
+log = "0.4.22"
+$
+
+
+$ vi ~/work/hello_app/src/main.rs
+use rand::Rng;
+use hello_lib;
+
+fn main() {
+    println!("{}", hello_lib::add(1, 2));
+}
+$
+
+$ cat ~/work/hello_lib/Cargo.toml
+[package]
+name = "hello_lib"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+
+$
+$ cat ~/work/hello_lib/src/lib.rs
+pub fn add(left: usize, right: usize) -> usize {
+    left + right
+}
+$
+
+
+// vscode generates correct launch.json with workspace cargo.toml
+$ cat ~/work/.vscode/launch.json
+
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug",
+
+            // "program": "${workspaceFolder}/<executable file>",
+
+            "cargo": {
+                "args": [
+                    "build", // "test",
+                    // "--no-run",
+                    "--bin=hello",
+                    "--package=hello"
+                ],
+                "filter": {
+                    "name": "hello",
+                    "kind": "bin"
+                }
+            },
+
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        }
+    ]
+}
+
+$
+
+
+---
+
+
+$ rm ~/.cargo/.package-cache
+$ cargo update
+$ cargo new hello_app
+$ cargo new hello_lib --lib
+$ cargo build
+$ cargo build --release
+$ cargo run
+$ cargo check
+$ ./target/debug/hello_app
+$ cargo clean
+$ cargo test
+
+
+---
+
+
+Managing Growing Projects with Packages, Crates, and Modules ,
+https://doc.rust-lang.org/book/ch07-00-managing-growing-projects-with-packages-crates-and-modules.html ,
+
+
+module:
+
+- module tree is formed in crate root file: src/main.rs, src/lib.rs;
+- there can be nested submodule in subdir:
+- for module `foo` in crate root src/main.rs, src/lib.rs: src/foo.rs;
+- for moudle `bar` in non root src/foo.rs: src/foo/bar.rs;
+
+use foo; // use external crate `foo`, workspace/members, package/name;
+mod bar; // use internal source files `bar.rs` inside same crate;
+
+
+crate:
+
+- binary crates (src/main.rs);
+- library crates (src/lib.rs), which can be used by other crates;
+
+
+package:
+
+- a package is a crate with Cargo.toml;
+- Cargo.toml describes package name, package version, rust version, dependencies;
+
+
+---
+
+
+1.
+
+// src/lib.rs  // library crate root ,
+mod foo; // there'll be: src/foo.rs, it needs no foo directory
+
+// src/foo.rs ,
+pub mod bar;  // there'll be: src/foo/bar.rs, it needs foo directory
+
+
+---
+
+
+Packages and Crates ,
+https://doc.rust-lang.org/book/ch07-01-packages-and-crates.html ,
+
+A package can contain as many binary crates as you like,
+but at most only one library crate.
+
+A package must contain at least one crate,
+whether thats a library or binary crate.
+
+
+---
+
+
+Defining Modules to Control Scope and Privacy ,
+https://doc.rust-lang.org/book/ch07-02-defining-modules-to-control-scope-and-privacy.html ,
+
+The pub mod garden; line tells the compiler to include the code it finds in src/garden.rs ,
+
+
+---
+
+
+Separating Modules into Different Files ,
+https://doc.rust-lang.org/book/ch07-05-separating-modules-into-different-files.html ,
+
+- in this case, the crate root file is src/lib.rs,
+but this procedure also works with binary crates
+whose crate root file is src/main.rs.
+
+- the compiler knows to look in this file: src/front_of_house.rs,
+because it came across the module declaration
+in the crate root with the name front_of_house.
+
+// cat src/lib.rs ,
+mod front_of_house; // there should be a file: front_of_house.rs ,
+pub use crate::front_of_house::hosting;
+pub fn eat_at_restaurant() {
+    hosting::add_to_waitlist();
+}
+
+- hosting is a child module of front_of_house, not of the root module.
+
+- module tree ,
+
+// src/front_of_house.rs ,
+pub mod hosting;
+
+// src/front_of_house/hosting.rs ,
+pub fn add_to_waitlist() {}
+
+
+---
+
+
+1. define a module
+
+$ cat foo.rs
+
+pub fn f1() {} // standalone function
+
+mod foo2 {
+    pub fn f2() {}
+}
+
+2. declare a module
+
+mod foo; // equals to base name of a file
+foo::f1();
+foo::foo2::f2();
+
+3. declare submodules:
+    In any file other than the crate root, you can declare submodules.
+
+// mod foo; // don't use syntax in lib.rs
+foo::hello(); // just use name directly
+
+4. module tree:
+    should be defined in src/lib.rs.
+
+// https://doc.rust-lang.org/book/ch07-03-paths-for-referring-to-an-item-in-the-module-tree.html ,
+
+
+---
+
+
+// print log filename line number
+
+macro_rules! println2 {
+    ($($args:tt)*) => {
+        let message = format!("{}:{}: {}", file!(), line!(), format_args!($($args)*));
+        println!("{message}");
+    };
+}
+
+fn main() {
+    let name = "abc";
+    let num = 123;
+    println2!("{name}, {num}");
+}
+
+// output:
+// src/main.rs:11: abc, 123
+
+
+---
+
+
+// logrotation with log4rs:
+
+$ cat lib.rs
+
+//
+// https://github.com/estk/log4rs/blob/main/examples/log_to_file_with_rolling.rs ,
+
+pub use log::{debug, error, info, trace, warn};
+use log::{LevelFilter, SetLoggerError};
+use log4rs::{
+    append::{
+        console::{ConsoleAppender, Target},
+        rolling_file::policy::compound::{
+            roll::fixed_window::FixedWindowRoller, trigger::size::SizeTrigger, CompoundPolicy,
+        },
+    },
+    config::{Appender, Config, Root},
+    encode::pattern::PatternEncoder,
+    filter::threshold::ThresholdFilter,
+};
+
+pub fn init_logging(dir: &str, name: &str) -> Result<(), SetLoggerError> {
+    const TRIGGER_FILE_SIZE: u64 = 1024u64 * 1024 * 1;
+    const LOG_FILE_COUNT: u32 = 10;
+    let file_path: &str = &format!("{dir}/{name}.log");
+
+    // https://docs.rs/log4rs/*/log4rs/append/rolling_file/policy/compound/roll/fixed_window/struct.FixedWindowRollerBuilder.html#method.build ,
+    let archive_pattern: &str = &format!("{dir}/{name}.{{}}.log");
+
+    // https://docs.rs/log4rs/latest/log4rs/encode/pattern/index.html ,
+    let pattern = "{d} {l} {file}:{line} - {m}\n";
+
+    let trigger = SizeTrigger::new(TRIGGER_FILE_SIZE);
+    let roller = FixedWindowRoller::builder()
+        .build(archive_pattern, LOG_FILE_COUNT)
+        .unwrap();
+    let policy = CompoundPolicy::new(Box::new(trigger), Box::new(roller));
+
+    // Pattern: https://docs.rs/log4rs/*/log4rs/encode/pattern/index.html ,
+    // Logging to log file. (with rolling)
+    let logfile = log4rs::append::rolling_file::RollingFileAppender::builder()
+        .encoder(Box::new(PatternEncoder::new(pattern)))
+        .build(file_path, Box::new(policy))
+        .unwrap();
+
+    // Build a stderr logger.
+    let stderr = ConsoleAppender::builder()
+        .target(Target::Stderr)
+        .encoder(Box::new(PatternEncoder::new(pattern)))
+        .build();
+
+    let config = Config::builder()
+        .appender(
+            Appender::builder()
+                .filter(Box::new(ThresholdFilter::new(log::LevelFilter::Trace)))
+                .build("logfile", Box::new(logfile)),
+        )
+        .appender(
+            Appender::builder()
+                .filter(Box::new(ThresholdFilter::new(log::LevelFilter::Trace)))
+                .build("stderr", Box::new(stderr)),
+        )
+        .build(
+            Root::builder()
+                .appender("logfile")
+                .appender("stderr")
+                .build(LevelFilter::Trace),
+        )
+        .unwrap();
+
+    let _handle = log4rs::init_config(config)?;
+    Ok(())
+}
+
+$
+
+
+$ cat main.rs
+
+use log2::init_logging;
+use log2::{debug, error, info, trace, warn};
+
+fn main() {
+    let dir = "./logs";
+    let name = "foo";
+    init_logging(dir, name);
+
+    // Generate some log messages to trigger rolling
+    loop {
+        error!("This is error message!");
+        warn!("This is warn message!");
+        info!("This is info message!");
+        debug!("This is debug message!");
+        trace!("This is trace message!");
+    }
+}
+
+$
+
+
+$ cd /path/to/mymodule  # package directory with cargo.toml
+$ cargo add log4rs log  # it will add dependencies and edit cargo.toml
+
+// workspace/members: "log2"
+// package/dependencies: log2 = {path = "../log2"}
+
+/*
+
+filename pattern:
+
+foo.log
+foo.0.log
+foo.1.log
+foo.2.log
+
+log messages:
+
+2024-09-30T23:09:10.152026+08:00 ERROR hello/src/main.rs:87 - This is error message!
+2024-09-30T23:09:10.152077+08:00 WARN hello/src/main.rs:88 - This is warn message!
+2024-09-30T23:09:10.152127+08:00 INFO hello/src/main.rs:89 - This is info message!
+2024-09-30T23:09:10.152178+08:00 DEBUG hello/src/main.rs:90 - This is debug message!
+2024-09-30T23:09:10.152873+08:00 TRACE hello/src/main.rs:91 - This is trace message!
+
+*/
+
+
+---
+
+
+const N1 = 5;   // const at compile time
+let n2 = 5;     // readonly variable
+let mut n3 = 5; // mutable variable
+
+let mut guess = String::new();      // make new instance from heap
+io::stdin().read_line(&mut guess)   // the & indicates its a reference
+
+static mut N4: isize = 1; // global variable
+unsafe {
+    N4 += 1;
+    println!("{N4}")
+}
+
+
+---
+
+
+// turn off underline for variable in VSCode
+// https://code.visualstudio.com/docs/languages/rust#_semantic-syntax-highlighting ,
+"editor.semanticHighlighting.enabled": false,
+
+
+---
+
+
+fn main() {
+
+    /*
+    warn:
+    value assigned to `age3` is never read
+    maybe it is overwritten before being read?
+    `#[warn(unused_assignments)]` on by default
+
+    solution:
+    use this immediately after the line with the warning:
+      let _ = foo;
+    */
+    let mut age = 12;
+    let _ = age;
+    age = 13;
+    let _ = age;
+
+    //answer 1
+    let mut age2 = 12;
+    let _ = age2;
+    age2 = 13;
+    let _ = age2;
+
+    //answer 2
+    let mut age3: i32; // or remove initial value
+    age3 = 12;
+    let _ = age3;
+    age3 = 13;
+    // let _ = age3;
+
+}
+
+
+---
+
+
+VSCode shortcuts // UTF-8
+
+Trigger suggestion       : Cmd I
+Trigger suggestion       : Option Esc
+Trigger parameter hints  : Shift Cmd Space
+Format                   : Shift Option F
+Show integrated terminal : Ctrl `
+
+
+---
+
+
+fn main() {
+    // let mut animal: Box<dyn Animal> = Box::new(Duck{});
+    let mut animal: &dyn Animal = &Duck{}; // non Box
+    animal.noise();
+
+    // animal = Box::new(Chick{});
+    animal = &Chick{}; // non Box
+    animal.noise();
+}
+
+trait Animal {
+    fn noise(&self);
+}
+
+struct Duck {}
+
+struct Chick {}
+
+impl Animal for Duck {
+    fn noise(&self) {
+        println!("{}:{}: {}", file!(), line!(), "ga ga ga");
+    }
+}
+
+impl Animal for Chick {
+    fn noise(&self) {
+        println!("{}:{}: {}", file!(), line!(), "ji ji ji");
+    }
+}
+
+
+---
+
+
+$ pwd
+/tmp/hello_rust
+$
+$ find . -print | sed -e 's;[^/]*/;|____;g;s;____|; |;g'
+
+|____src
+| |____lib.rs
+| |____main.rs
+$
+$ cat src/lib.rs
+
+pub mod mymod { // with mod
+
+    pub fn add(left: usize, right: usize) -> usize {
+        left + right
+    }
+
+} // mod
+
+$
+$ cat src/main.rs
+// use hello_rust::add; // no mod
+use hello_rust::mymod; // with mod
+
+fn main() {
+    let a = add(1, 2); // no mod
+    let b = mymod::add(1, 2); // with mod
+}
+$
+
+
+---
+
+
+fn main() {
+    // https://doc.rust-lang.org/stable/rust-by-example/scope/move/partial_move.html ,
+    let p1 = People{name: "tom".to_string(), nickname: "tom".to_string(),};
+    // let People{name, ref nickname} = p1;
+    // let a = p1.name; //partial move for struct field
+    let b = &p1.name;
+    println!("{}:{}: {:?} {:?}", file!(), line!(), "p1", p1.nickname);
+
+    // partial move for tuple too
+    let a = "tom".to_string();
+    let b = "tom".to_string();
+    let c = (a, b);
+    let d = c.0;
+    // println!("{}:{}: {:?}", file!(), line!(), c);
+
+    // but no partial move for vec elements
+    let v = vec!["tom".to_string(),"tom".to_string(),"tom".to_string(),];
+    // let a = v[0]; //cannot move out of index of `Vec<String>`
+    let a = &v[0];
+    println!("{}:{}: {:?}", file!(), line!(), v);
+
+}
+
+#[derive(Debug)]
+struct People {
+    name: String,
+    nickname: String,
+}
+
+
+---
+
+
+fn main() {
+    let s1 = "hello".to_string();
+    let s2 = s1;
+    let s3 = s1;  // error: use of moved value
+    let s4 = &s1;  // error: borrow of moved value
+}
+
+
+---
+
+
+fn main() {
+    // Result
+    let result: Result<i32, &str> = Ok(123);
+    if result.is_ok() {
+        println!("result: {}", result.unwrap());
+    }
+    let result: Result<i32, &str> = Err("Error message");
+    if result.is_err() {
+        // println!("{}", result.unwrap()); // error, called `Result::unwrap()` on an `Err`
+        println!("is_err");
+    }
+
+    // Option
+    let option: Option<i32> = Some(123);
+    if option.is_some() {
+        println!("option: {}", option.unwrap());
+    }
+    let option: Option<i32> = None;
+    if option.is_none() {
+        // println!("is_none {}", option.unwrap()); // error, called `Option::unwrap()` on a `None`
+        println!("is_none");
+    }
+}
+
+
+---
+
+
+fn main() {
+    // &str string slice is immutable by default.
+    // to_lowercase() returns a temporary object
+    // which goes out of scope before the temporary is assigned.
+
+    // 1. error
+    // let mut a = "ABcd";
+    // a = a.to_lowercase().as_str(); // error.
+
+    // 2. ok
+    let mut a = String::from("ABcd");
+    a = a.to_lowercase();
+    println2!("{}", a);
+
+    // 3. ok
+    let a = "ABcd".to_lowercase();
+    let b = &a; // ok.
+    let b = a.as_str(); // ok.
+    println2!("{b}");
+
+}
+
+
+---
+
+
+// do not do random access index or slicing in string slice directly.
+// convert string slice to Vec.
+
+fn main() {
+    // let hello = "Здравствуйте";
+    // let s = &hello[0..1]; // error: byte index 1 is not a char boundary; it is inside 'З' (bytes 0..2) of `Здравствуйте`
+    // println!("{s}");
+
+    let v: Vec<char> = "Здравствуйте".chars().collect();
+    let s = &v[0..1]; // ok
+    let s: String = s.iter().collect();
+    println!("{s}");
+}
+
+
+//---
+
+
+// do not search or find in string slice directly.
+// convert string slice to Vec.
+
+fn main() {
+
+    // https://doc.rust-lang.org/book/ch08-02-strings.html ,
+    // If we were to try to slice only part of a character bytes with something
+    // like &hello[0..1], Rust would panic at runtime in the same way as if an
+    // invalid index were accessed in a vector:
+
+    // do not search in string slice,
+
+    // let name = "Здравствуйте"; // "abcdef123";
+    // let needle = 'e';
+    // let first: i32 = 1;
+    // let last: i32 = 2; // name.len() as i32;
+
+    // let pos = &name[first as usize..last as usize].find(needle); // error
+    // let pos = pos.unwrap_or(usize::MAX) as i32;
+    // println!("ret: {}, found: {}, index: {}", pos, pos != -1, pos + first);
+}
+
+
+// search or find in Vec.
+
+fn main() {
+    let haystack = vec![1, 2, 3, 2, 4, 2, 5];
+    let needle = 2;
+
+    let mut first = 0; // 0; // 2;
+    let last = 5; // haystack.len(); // 5;
+
+    while let Some(i) = haystack[first..last].iter().position(|&x| x == needle) {
+        let index = first + i;
+        println!("index: {}", index);
+        first = index + 1;
+    }
+}
+
+fn main() {
+    let s = "BaBBaBBaB";
+    let haystack: Vec<char> = s.chars().collect();
+    let needle = 'a';
+
+    let mut first = 0; // 0; // 2;
+    let last = 5; // haystack.len(); // 5;
+
+    while let Some(i) = haystack[first..last].iter().position(|&x| x == needle) {
+        let index = first + i;
+        println!("index: {}", index);
+        first = index + 1;
+    }
+}
+
+
+//---
+
+
+// find or search search multiple occurrences of substring in range in a larger string
+// and return the position index.
+// returns the index of the first occurrence in each iteration in loop.
+
+fn main() {
+    let haystack = "The quick brown fox jumps over the lazy dog. The fox is clever. fox!!!";
+    let needle = "fox"; // "f";
+    let haystack = haystack.to_lowercase();
+    let needle = needle.to_lowercase();
+
+    // Find all occurrences of the substring
+    // in half open range of (first..last]
+    let mut first = 0;
+    let last = 56; // haystack.len(); // 56;
+
+    while let Some(i) = haystack[first..last].find(&needle) {
+        let index = first + i;
+        println!("index: {}", index);
+        first = index + 1;
+    }
+}
+
+
+---
+
+
+// find search multiple occurrences of sub sequence in range of a larger sequence or vector
+// and return the position index.
+
+fn main() {
+    let haystack = vec![1, 2, 3, 4, 2, 3, 4, 5, 2, 3];
+    let needle = vec![2, 3];
+
+    let mut first = 0;
+    let last = 6; // haystack.len(); // 6;
+
+    for (i, window) in haystack[first..last].windows(needle.len()).enumerate() {
+        if window == needle {
+            let index = i + first;
+            println!("index: {}", index);
+        }
+    }
+    println!("---------");
+
+    // or
+    while let Some(i) = haystack[first..last]
+        .windows(needle.len())
+        .position(|window| window == needle)
+    {
+        let index = i + first;
+        println!("index: {}", index);
+        first = index + 1;
+    }
+}
+
+
+---
+
+
+// quick sort, binary search, find,
+// rust partition_point, c++ lower_bound, upper_bound, equal_range,
+
+fn main() {
+    let mut haystack = vec![
+        Foo { name: String::from("apple"), num: 1, },
+        Foo { name: String::from("apple"), num: 1, },
+        Foo { name: String::from("banana"), num: 2, },
+        Foo { name: String::from("banana"), num: 2, },
+        Foo { name: String::from("orange"), num: 3, },
+    ];
+    let needle = Foo {
+        name: String::from("banana"),
+        num: 2,
+    }; // "aaabanana", "banana", "zzzbanana"
+
+    haystack.sort();
+
+    let lower = haystack.partition_point(|x| x < &needle);
+    let upper = haystack.partition_point(|x| x <= &needle);
+
+    if lower == upper {
+        println!("not found");
+    }
+    for i in lower..upper {
+        println!("{}: {:?}, {:?}", line!(), i, haystack[i]);
+    }
+}
+
+#[derive(Debug, Eq, Ord, PartialEq, PartialOrd)]
+struct Foo {
+    name: String,
+    num: i32,
+}
+
+
+---
+
+
+fn main() {
+    // change character in string by replace_range
+    let mut s = String::from("hello");
+    println!("{:?}", s); // "hello"
+    s.replace_range(0..1, "H");
+    println!("{:?}", s); // "Hello"
+
+    // convert string to vec of character
+    let s = String::from("hello");
+    let mut v: Vec<char> = s.chars().collect();
+    v[0] = 'H';
+    println!("{:?}", v); // ['h', 'e', 'l', 'l', 'o']
+
+    // convert vec of character to string
+    let s: String = v.iter().collect();
+    println!("{}", s); // "hello"
+}
+
+
+---
+
+
+https://doc.rust-lang.org/rust-by-example/generics/bounds.html ,
+
+generics use trait to constrain type parameter,
+
+Bounds,
+
+When working with generics, the type parameters often must
+use traits as bounds to stipulate what functionality a type implements.
+
+For example, the following example uses the trait Display to print and
+so it requires T to be bound by Display; that is, T must implement Display.
+
+// Define a function `printer` that takes a generic type `T` which
+// must implement trait `Display`.
+fn printer<T: Display>(t: T) {
+    println!("{}", t);
+}
+
+
+---
+
+
+https://doc.rust-lang.org/rust-by-example/generics/gen_trait.html ,
+
+trait can be generic itself ,
+
+Traits,
+
+Of course traits can also be generic.
+Here we define one which reimplements the Drop trait as a generic method
+to drop itself and an input.
+
+
+---
+
+
+https://doc.rust-lang.org/book/ch17-01-what-is-oo.html ,
+
+use trait for polymorphism or interface ,
+
+Polymorphism,
+
+To many people, polymorphism is synonymous with inheritance.
+But its actually a more general concept that refers to code that can
+work with data of multiple types.
+For inheritance, those types are generally subclasses.
+
+Rust instead uses generics to abstract over different possible types
+and trait bounds to impose constraints on what those types must provide.
+This is sometimes called bounded parametric polymorphism.
+
+
+---
+
+
+https://doc.rust-lang.org/rust-by-example/scope/borrow.html ,
+
+move is value semantics,
+borrow is reference semantics,
+
+Borrowing,
+
+Most of the time, we'd like to access data without taking ownership over it.
+To accomplish this, Rust uses a borrowing mechanism.
+Instead of passing objects by value (T), objects can be passed by reference (&T).
+
+
+---
+
+
+https://doc.rust-lang.org/book/ch04-01-what-is-ownership.html ,
+
+move is a shallow copy, it invalidates the original moved object ,
+
+If you have heard the terms shallow copy and deep copy while working with other languages,
+the concept of copying the pointer, length, and capacity without copying the data probably
+sounds like making a shallow copy.
+But because Rust also invalidates the first variable,
+instead of being called a shallow copy, it is known as a move.
+
+
+---
+
+
+
+
+
+
+
+
+
+---
+
+
+  </textarea>
+
+</body>
+
+</html>

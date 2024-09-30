@@ -7,15 +7,15 @@
         {
             "type": "lldb",
             "request": "launch",
-            "name": "Debug executable 'hello'",
+            "name": "Debug executable 'main'",
             "cargo": {
                 "args": [
                     "build",
-                    "--bin=hello",
-                    "--package=hello"
+                    "--bin=main",
+                    "--package=main"
                 ],
                 "filter": {
-                    "name": "hello",
+                    "name": "main",
                     "kind": "bin"
                 }
             },
@@ -25,16 +25,16 @@
         {
             "type": "lldb",
             "request": "launch",
-            "name": "Debug unit tests in executable 'hello'",
+            "name": "Debug unit tests in executable 'main'",
             "cargo": {
                 "args": [
                     "test",
                     "--no-run",
-                    "--bin=hello",
-                    "--package=hello"
+                    "--bin=main",
+                    "--package=main"
                 ],
                 "filter": {
-                    "name": "hello",
+                    "name": "main",
                     "kind": "bin"
                 }
             },
@@ -44,17 +44,54 @@
         {
             "type": "lldb",
             "request": "launch",
-            "name": "Debug unit tests in library 'foo'",
+            "name": "Debug unit tests in library 'log2'",
             "cargo": {
                 "args": [
                     "test",
                     "--no-run",
                     "--lib",
-                    "--package=foo"
+                    "--package=log2"
                 ],
                 "filter": {
-                    "name": "foo",
+                    "name": "log2",
                     "kind": "lib"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug executable 'mod'",
+            "cargo": {
+                "args": [
+                    "build",
+                    "--bin=mod",
+                    "--package=mod"
+                ],
+                "filter": {
+                    "name": "mod",
+                    "kind": "bin"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests in executable 'mod'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--bin=mod",
+                    "--package=mod"
+                ],
+                "filter": {
+                    "name": "mod",
+                    "kind": "bin"
                 }
             },
             "args": [],

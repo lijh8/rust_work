@@ -3,4 +3,5 @@ resolver = "2"
 members = [
     "main",
     "log2",
+    "mod",
 ]

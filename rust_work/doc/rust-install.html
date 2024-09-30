@@ -248,32 +248,97 @@ this is a very apt comparison!
 Just like directories in a filesystem, you use modules to organize your code.
 And just like files in a directory, we need a way to find our modules.
 
-- a module is a source file.
-- a source file is a moudle;
 - similar to python, in which a module is a source file;
+- a module is a source file. a source file is a moudle;
 
 
 module:
 
-- module tree is formed in crate root file: src/main.rs, src/lib.rs;
-- there can be nested submodule in subdir:
-- for module `foo` in crate root src/main.rs, src/lib.rs: src/foo.rs;
-- for moudle `bar` in non root src/foo.rs: src/foo/bar.rs;
+1. crate root file: src/main.rs, src/lib.rs,
+-   mod foo;
+-   foo::fun();
+-   use foo::fun;
+-   fun();
+-   use foo::fun as fun2();
+-   fun2();
 
-use foo; // use external crate `foo`, workspace/members, package/name;
-mod bar; // use internal source files `bar.rs` inside same crate;
+- use public items in files in same directory: src/foo.rs, in the same crate;
+
+2. non root file: src/foo.rs,
+-   mod bar;
+-   use bar::fun();
+-   use crate::bar;
+
+- use public items in sub-directories: src/foo/bar.rs, in the same crate;
 
 
 crate:
 
 - binary crates (src/main.rs);
 - library crates (src/lib.rs), which can be used by other crates;
+-   use foo; // use external crate `foo`, workspace/members, package/name;
 
 
 package:
 
 - a package is a crate with Cargo.toml;
 - Cargo.toml describes package name, package version, rust version, dependencies;
+
+
+---
+
+
+$ pwd
+/Users/ljh/Documents/rust_work/main/src
+$
+$ ls
+bar.rs  foo     foo.rs  main.rs
+$
+$ find . -print | sed -e 's;[^/]*/;|____;g;s;____|; |;g'
+
+.
+|____foo.rs
+|____foo
+| |____bar.rs
+|____main.rs
+|____bar.rs
+$
+
+$ cat main.rs
+mod bar; // pub required for access from outside the crate
+mod foo;
+use foo::bar as bar2; // sub-directory src/foo/bar.rs imported in foo.fs
+
+fn main() {
+    println!("main");
+    foo::foo();
+    bar::bar();
+    bar2::bar();
+}
+$
+
+$ cat foo.rs
+pub mod bar; // for sub-directory src/foo/bar.rs
+use crate::bar as bar1; // src/bar.rs imported in main.rs
+
+pub fn foo() {
+    println!("foo");
+    bar::bar(); // src/foo/bar.rs
+    bar1::bar(); // src/bar.rs
+}
+$
+
+$ cat bar.rs
+pub fn bar() {
+    println!("bar1");
+}
+$
+
+$ cat foo/bar.rs
+pub fn bar() {
+    println!("bar2");
+}
+$
 
 
 ---

@@ -4,8 +4,8 @@
 // $ cd /path/to/mymodule  # package directory with cargo.toml
 // $ cargo add log4rs log  # it will add dependencies and edit cargo.toml
 
+use log::LevelFilter;
 pub use log::{debug, error, info, trace, warn};
-use log::{LevelFilter, SetLoggerError};
 use log4rs::{
     append::{
         console::{ConsoleAppender, Target},
@@ -18,7 +18,7 @@ use log4rs::{
     filter::threshold::ThresholdFilter,
 };
 
-pub fn init_logging(dir: &str, name: &str) -> Result<(), SetLoggerError> {
+pub fn init_logging(dir: &str, name: &str) -> Result<(), Box<dyn std::error::Error>> {
     const TRIGGER_FILE_SIZE: u64 = 1024u64 * 1024 * 1;
     const LOG_FILE_COUNT: u32 = 10;
     let file_path: &str = &format!("{dir}/{name}.log");
@@ -30,17 +30,14 @@ pub fn init_logging(dir: &str, name: &str) -> Result<(), SetLoggerError> {
     let pattern = "{d} {l} {file}:{line} - {m}\n";
 
     let trigger = SizeTrigger::new(TRIGGER_FILE_SIZE);
-    let roller = FixedWindowRoller::builder()
-        .build(archive_pattern, LOG_FILE_COUNT)
-        .unwrap();
+    let roller = FixedWindowRoller::builder().build(archive_pattern, LOG_FILE_COUNT)?;
     let policy = CompoundPolicy::new(Box::new(trigger), Box::new(roller));
 
     // Pattern: https://docs.rs/log4rs/*/log4rs/encode/pattern/index.html ,
     // Logging to log file. (with rolling)
     let logfile = log4rs::append::rolling_file::RollingFileAppender::builder()
         .encoder(Box::new(PatternEncoder::new(pattern)))
-        .build(file_path, Box::new(policy))
-        .unwrap();
+        .build(file_path, Box::new(policy))?;
 
     // Build a stderr logger.
     let stderr = ConsoleAppender::builder()
@@ -64,8 +61,7 @@ pub fn init_logging(dir: &str, name: &str) -> Result<(), SetLoggerError> {
                 .appender("logfile")
                 .appender("stderr")
                 .build(LevelFilter::Trace),
-        )
-        .unwrap();
+        )?;
 
     let _handle = log4rs::init_config(config)?;
     Ok(())
@@ -84,7 +80,10 @@ use log2::{debug, error, info, trace, warn};
 fn main() {
     let dir = "./logs";
     let name = "foo";
-    init_logging(dir, name);
+    let _ = match init_logging(dir, name) {
+        Ok(_) => (),
+        Err(e) => println!("{e}"),
+    };
 
     // Generate some log messages to trigger rolling
     loop {
@@ -99,20 +98,3 @@ fn main() {
 $
 
 */
-
-//
-
-pub fn add(left: u64, right: u64) -> u64 {
-    left + right
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn it_works() {
-        let result = add(2, 2);
-        assert_eq!(result, 4);
-    }
-}

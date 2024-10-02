@@ -777,27 +777,44 @@ fn main() {
 ---
 
 
+
 fn main() {
     // Result
+
     let result: Result<i32, &str> = Ok(123);
-    if result.is_ok() {
-        println!("result: {}", result.unwrap());
+    // let result: Result<i32, &str> = Err("Error message");
+
+    if let Ok(value) = result {
+        println2!("result: {}", value);
     }
-    let result: Result<i32, &str> = Err("Error message");
+    if let Err(e) = result {
+        println2!("is_err: {e}");
+    }
+
+    if result.is_ok() {
+        println2!("result: {}", result.unwrap());
+    }
     if result.is_err() {
-        // println!("{}", result.unwrap()); // error, called `Result::unwrap()` on an `Err`
-        println!("is_err");
+        println2!("is_err");
     }
 
     // Option
+
     let option: Option<i32> = Some(123);
-    if option.is_some() {
-        println!("option: {}", option.unwrap());
+    // let option: Option<i32> = None;
+
+    if let Some(value) = option {
+        println2!("option: {}", value);
     }
-    let option: Option<i32> = None;
+    if let None = option {
+        println2!("is_none");
+    }
+
+    if option.is_some() {
+        println2!("option: {}", option.unwrap());
+    }
     if option.is_none() {
-        // println!("is_none {}", option.unwrap()); // error, called `Option::unwrap()` on a `None`
-        println!("is_none");
+        println2!("is_none");
     }
 }
 

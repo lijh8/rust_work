@@ -1132,11 +1132,11 @@ instead of being called a shallow copy, it is known as a move.
 
 
 macro_rules! type_name2 {
-    ($val:expr) => {{
+    ($arg:expr) => {{
         fn type_name2<T>(_: &T) -> &str {
             std::any::type_name::<T>()
         }
-        type_name2(&$val)
+        type_name2(&$arg)
     }};
 }
 

@@ -1,20 +1,15 @@
-macro_rules! println2 {
-    ($($args:tt)*) => {
-        let message = format!("{}:{}: {}", file!(), line!(), format_args!($($args)*));
-        println!("{message}");
-    };
+fn type_name2<'a, T>(_: T) -> &'a str {
+    std::any::type_name::<T>()
 }
 
 fn main() {
     let name = "abc";
     let num = 123;
-    println2!("{name}, {num}");
-    dbg!(format!("{name}, {num}")); // dbg!() works in release too.
+    dbg!(format!("{}", type_name2(name)));
+    dbg!(format!("{}", type_name2(num + 1)));
 }
 
 /*
-main/src/main.rs:17: abc, 123
-[main/src/main.rs:18:5] format!("{name}, {num}") = "abc, 123"
-$
-
+[main/src/main.rs:8:5] format!("{}", type_name2(name)) = "&str"
+[main/src/main.rs:9:5] format!("{}", type_name2(num + 1)) = "i32"
 */

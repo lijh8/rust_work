@@ -443,27 +443,60 @@ foo::hello(); // just use name directly
 
 // print log filename line number
 
+macro_rules! dbg2 {
+    ($($arg:tt)*) => {
+        dbg!(format!($($arg)*))
+    };
+}
+
 macro_rules! println2 {
     ($($args:tt)*) => {
         println!("{}:{}: {}", file!(), line!(), format_args!($($args)*));
     };
 }
 
-
 fn main() {
-    let name = "abc";
+    let name = "abc".to_string();
     let num = 123;
 
-    println2!("{name}, {num}");
+    dbg2!("{}, {}", name, num);
+    dbg!(format!("{}, {}", name, num));
+    println2!("{}, {}", name, num);
 
-    // or, simpler:
-    dbg!(format!("{name}, {num}")); // dbg!() works in release too.
-
+    let name = name; // ownership remains and was not taken
 }
 
 /*
-main/src/main.rs:17: abc, 123
-[main/src/main.rs:18:5] format!("{name}, {num}") = "abc, 123"
+[main/src/main.rs:17:5] format! ("{}, {}", name, num) = "abc, 123"
+[main/src/main.rs:18:5] format!("{}, {}", name, num) = "abc, 123"
+main/src/main.rs:19: abc, 123
+*/
+
+
+---
+
+
+macro_rules! type_name2 {
+    ($arg:expr) => {{
+        fn type_name2<T>(_: &T) -> &str {
+            std::any::type_name::<T>()
+        }
+        type_name2(&$arg)
+    }};
+}
+
+fn main() {
+    let name = "abc".to_string();
+    println!("{}", type_name2!(10 + 1));
+    println!("{}", type_name2!("abc".to_string()));
+    println!("{}", type_name2!(name)); // do not take ownership
+    let name = name; // still in use
+}
+
+/*
+i32
+alloc::string::String
+alloc::string::String
 */
 
 
@@ -1129,33 +1162,6 @@ the concept of copying the pointer, length, and capacity without copying the dat
 sounds like making a shallow copy.
 But because Rust also invalidates the first variable,
 instead of being called a shallow copy, it is known as a move.
-
-
----
-
-
-macro_rules! type_name2 {
-    ($arg:expr) => {{
-        fn type_name2<T>(_: &T) -> &str {
-            std::any::type_name::<T>()
-        }
-        type_name2(&$arg)
-    }};
-}
-
-fn main() {
-    let name = "abc".to_string();
-    println!("{}", type_name2!(10 + 1));
-    println!("{}", type_name2!("abc".to_string()));
-    println!("{}", type_name2!(name)); // do not take ownership
-    let name = name; // still in use
-}
-
-/*
-i32
-alloc::string::String
-alloc::string::String
-*/
 
 
 ---

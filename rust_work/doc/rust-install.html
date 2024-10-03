@@ -445,8 +445,7 @@ foo::hello(); // just use name directly
 
 macro_rules! println2 {
     ($($args:tt)*) => {
-        let message = format!("{}:{}: {}", file!(), line!(), format_args!($($args)*));
-        println!("{message}");
+        println!("{}:{}: {}", file!(), line!(), format_args!($($args)*));
     };
 }
 
@@ -454,8 +453,12 @@ macro_rules! println2 {
 fn main() {
     let name = "abc";
     let num = 123;
+
     println2!("{name}, {num}");
+
+    // or, simpler:
     dbg!(format!("{name}, {num}")); // dbg!() works in release too.
+
 }
 
 /*

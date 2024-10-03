@@ -1,22 +1,18 @@
-macro_rules! dbg2 {
-    ($($arg:tt)*) => {
-        dbg!(format!($($arg)*))
-    };
-}
-
-macro_rules! println2 {
-    ($($args:tt)*) => {
-        println!("{}:{}: {}", file!(), line!(), format_args!($($args)*));
-    };
+macro_rules! type_name2 {
+    ($arg:expr) => {{
+        fn type_name2<T>(_: &T) -> &str {
+            std::any::type_name::<T>()
+        }
+        type_name2(&$arg)
+    }};
 }
 
 fn main() {
-    let name = "abc".to_string();
-    let num = 123;
+    let number = 5;
+    let text = "Hello";
+    let text2 = "Hello".to_string();
 
-    dbg2!("{}, {}", name, num);
-    dbg!(format!("{}, {}", name, num));
-    println2!("{}, {}", name, num);
-
-    let name = name; // ownership remains and was not taken
+    dbg!(format!("{}", type_name2!(&number)));
+    dbg!(format!("{}", type_name2!(&text)));
+    dbg!(format!("{}", type_name2!(&text2)));
 }

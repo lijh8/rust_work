@@ -476,6 +476,10 @@ main/src/main.rs:19: abc, 123
 ---
 
 
+// use it like the println! macro, so both work without taking ownership.
+//   type_name2!(text)
+//   type_name2!(&text)
+
 macro_rules! type_name2 {
     ($arg:expr) => {{
         fn type_name2<T>(_: &T) -> &str {

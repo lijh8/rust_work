@@ -482,7 +482,7 @@ main/src/main.rs:19: abc, 123
 
 macro_rules! type_name2 {
     ($arg:expr) => {{
-        fn type_name2<T>(_: &T) -> &str {
+        fn type_name2<T: ?Sized>(_: &T) -> &str {
             std::any::type_name::<T>()
         }
         type_name2(&$arg)
@@ -490,17 +490,32 @@ macro_rules! type_name2 {
 }
 
 fn main() {
-    let name = "abc".to_string();
-    println!("{}", type_name2!(10 + 1));
-    println!("{}", type_name2!("abc".to_string()));
-    println!("{}", type_name2!(name)); // do not take ownership
-    let name = name; // still in use
+    let v = vec![1, 2, 3];
+    let a = [1, 2, 3];
+
+    dbg!(format!("{}", type_name2!(v)));
+    dbg!(format!("{}", type_name2!(a)));
+    dbg!(format!("{}", type_name2!(&v)));
+    dbg!(format!("{}", type_name2!(&a)));
+    dbg!(format!("{}", type_name2!(&v[..])));
+    dbg!(format!("{}", type_name2!(&a[..])));
+
+    dbg!(format!("{}", type_name2!(v[..]))); // ?Sized
+    dbg!(format!("{}", type_name2!(a[..]))); // ?Sized
+
+    let a2 = a;
+    let v2 = v;
 }
 
 /*
-i32
-alloc::string::String
-alloc::string::String
+[main/src/main.rs:16:5] format!("{}", type_name2!(v)) = "alloc::vec::Vec<i32>"
+[main/src/main.rs:17:5] format!("{}", type_name2!(a)) = "[i32; 3]"
+[main/src/main.rs:18:5] format!("{}", type_name2!(&v)) = "&alloc::vec::Vec<i32>"
+[main/src/main.rs:19:5] format!("{}", type_name2!(&a)) = "&[i32; 3]"
+[main/src/main.rs:20:5] format!("{}", type_name2!(&v[..])) = "&[i32]"
+[main/src/main.rs:21:5] format!("{}", type_name2!(&a[..])) = "&[i32]"
+[main/src/main.rs:23:5] format!("{}", type_name2!(v[..])) = "[i32]"
+[main/src/main.rs:24:5] format!("{}", type_name2!(a[..])) = "[i32]"
 */
 
 
@@ -997,7 +1012,7 @@ fn main() {
 //---
 
 
-// find or search search multiple occurrences of substring in range in a larger string
+// find or search for multiple occurrences of substring in range in a larger string
 // and return the position index.
 // returns the index of the first occurrence in each iteration in loop.
 

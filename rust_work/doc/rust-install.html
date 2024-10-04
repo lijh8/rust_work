@@ -34,20 +34,21 @@ $ source ~/.profile
 
 Cargo mirror:
 
+$ rm ~/.cargo/.package-cache
+$
 $ vi ~/.cargo/config.toml
 [source.crates-io]
 replace-with = 'tuna'
 [source.tuna]
 registry = "https://mirrors.tuna.tsinghua.edu.cn/git/crates.io-index.git"
 $
-$ rm ~/.cargo/.package-cache
 
 
 ---
 
 
-$ sudo apt install build-essential
-$ sudo apt install curl
+$ apt install build-essential
+$ apt install curl
 
 $ source ~/.profile
 $ curl --proto '=https' --tlsv1.2 https://sh.rustup.rs -sSf | sh
@@ -110,9 +111,22 @@ matklad.rust-analyzer,
 vadimcn.vscode-lldb,
 
 VSCode settings:
-  "rust-analyzer.hover.actions.enable": false,
-  "rust-analyzer.inlayHints.typeHints.enable": true,
-  "rust-analyzer.lens.enable": false,
+    "rust-analyzer.hover.actions.enable": false,
+    "rust-analyzer.inlayHints.typeHints.enable": true,
+    "rust-analyzer.lens.enable": false,
+
+// turn off underline for variable
+// https://code.visualstudio.com/docs/languages/rust#_semantic-syntax-highlighting ,
+    "editor.semanticHighlighting.enabled": false,
+
+
+VSCode shortcuts:
+
+Trigger suggestion       : Cmd I
+Trigger suggestion       : Option Esc
+Trigger parameter hints  : Shift Cmd Space
+Format                   : Shift Option F
+Show integrated terminal : Ctrl `
 
 
 ---
@@ -137,54 +151,54 @@ $ vi Cargo.toml
 [workspace]
 resolver = "2"
 members = [
-    "hello_app",
-    "hello_lib",
+    "main",
+    "foo",
 ]
-$ cargo new hello_app
-$ cargo new hello_lib --lib
+$ cargo new main
+$ cargo new foo --lib
 
 // https://doc.rust-lang.org/cargo/reference/specifying-dependencies.html#multiple-locations ,
 
-# add dependencies by editing cargo.toml
-$ vi ~/work/hello_app/Cargo.toml
+# add dependencies by editing Cargo.toml
+$ vi ~/work/main/Cargo.toml
 [dependencies]
-hello_lib = { path = "../hello_lib", version = "0.1.0" }
+foo = { path = "../foo", version = "0.1.0" }
 $
 
 # or use cargo add command
 $ cargo add log  # from crates.io
-$ cat ~/work/hello_app/Cargo.toml
+$ cat ~/work/main/Cargo.toml
 [dependencies]
 log = "0.4.22"
 $
 
 
-$ vi ~/work/hello_app/src/main.rs
+$ vi ~/work/main/src/main.rs
 use rand::Rng;
-use hello_lib;
+use foo;
 
 fn main() {
-    println!("{}", hello_lib::add(1, 2));
+    println!("{}", foo::add(1, 2));
 }
 $
 
-$ cat ~/work/hello_lib/Cargo.toml
+$ cat ~/work/foo/Cargo.toml
 [package]
-name = "hello_lib"
+name = "foo"
 version = "0.1.0"
 edition = "2021"
 
 [dependencies]
 
 $
-$ cat ~/work/hello_lib/src/lib.rs
+$ cat ~/work/foo/src/lib.rs
 pub fn add(left: usize, right: usize) -> usize {
     left + right
 }
 $
 
 
-// vscode generates correct launch.json with workspace cargo.toml
+// vscode generates correct launch.json with workspace Cargo.toml.
 $ cat ~/work/.vscode/launch.json
 
 {
@@ -193,26 +207,21 @@ $ cat ~/work/.vscode/launch.json
         {
             "type": "lldb",
             "request": "launch",
-            "name": "Debug",
-
-            // "program": "${workspaceFolder}/<executable file>",
-
+            "name": "Debug executable 'main'",
             "cargo": {
                 "args": [
-                    "build", // "test",
-                    // "--no-run",
-                    "--bin=hello",
-                    "--package=hello"
+                    "build",
+                    "--bin=main",
+                    "--package=main"
                 ],
                 "filter": {
-                    "name": "hello",
+                    "name": "main",
                     "kind": "bin"
                 }
             },
-
             "args": [],
             "cwd": "${workspaceFolder}"
-        }
+        },
     ]
 }
 
@@ -224,13 +233,13 @@ $
 
 $ rm ~/.cargo/.package-cache
 $ cargo update
-$ cargo new hello_app
-$ cargo new hello_lib --lib
+$ cargo new main
+$ cargo new foo --lib
 $ cargo build
 $ cargo build --release
 $ cargo run
 $ cargo check
-$ ./target/debug/hello_app
+$ ./target/debug/main
 $ cargo clean
 $ cargo test
 
@@ -250,7 +259,7 @@ And just like files in a directory, we need a way to find our modules.
 
 - similar to python, in which a module is a source file;
 - a module is a source file. a source file is a moudle;
-
+- unless it is inline module;
 
 module:
 
@@ -443,32 +452,27 @@ foo::hello(); // just use name directly
 
 // print log filename line number
 
+// let name = "abc"
+// let num = 123
+
+// dbg!(format!("{}, {}", name, num));
+// dbg2!("{}, {}", name, num);
 macro_rules! dbg2 {
-    ($($arg:tt)*) => {
-        dbg!(format!($($arg)*))
+    ($($args:tt)*) => {
+        dbg!(format_args!($($args)*))
     };
 }
 
+// println2!("{}, {}", name, num);
 macro_rules! println2 {
     ($($args:tt)*) => {
         println!("{}:{}: {}", file!(), line!(), format_args!($($args)*));
     };
 }
 
-fn main() {
-    let name = "abc".to_string();
-    let num = 123;
-
-    dbg2!("{}, {}", name, num);
-    dbg!(format!("{}, {}", name, num));
-    println2!("{}, {}", name, num);
-
-    let name = name; // ownership remains and was not taken
-}
-
 /*
-[main/src/main.rs:17:5] format! ("{}, {}", name, num) = "abc, 123"
-[main/src/main.rs:18:5] format!("{}, {}", name, num) = "abc, 123"
+[main/src/main.rs:1:5] format!("{}, {}", name, num) = "abc, 123"
+[main/src/main.rs:2:5] format! ("{}, {}", name, num) = "abc, 123"
 main/src/main.rs:19: abc, 123
 */
 
@@ -477,8 +481,8 @@ main/src/main.rs:19: abc, 123
 
 
 // use it like the println! macro, so both work without taking ownership.
-//   type_name2!(text)
-//   type_name2!(&text)
+// type_name2!(text)
+// type_name2!(&text)
 
 macro_rules! type_name2 {
     ($arg:expr) => {{
@@ -526,7 +530,6 @@ fn main() {
 
 $ cat lib.rs
 
-//
 // https://github.com/estk/log4rs/blob/main/examples/log_to_file_with_rolling.rs ,
 
 pub use log::{debug, error, info, trace, warn};
@@ -622,8 +625,8 @@ fn main() {
 $
 
 
-$ cd /path/to/mymodule  # package directory with cargo.toml
-$ cargo add log4rs log  # it will add dependencies and edit cargo.toml
+$ cd /path/to/mymodule  # package directory with Cargo.toml
+$ cargo add log4rs log  # it will add dependencies and edit Cargo.toml
 
 // workspace/members: "log2"
 // package/dependencies: log2 = {path = "../log2"}
@@ -651,8 +654,8 @@ log messages:
 ---
 
 
-const N1 = 5;   // const at compile time
-let n2 = 5;     // readonly variable
+const N1: i32 = 5; // const at compile time
+let n2 = 5;     // readonly variable at runtime
 let mut n3 = 5; // mutable variable
 
 let mut guess = String::new();      // make new instance from heap
@@ -663,14 +666,6 @@ unsafe {
     N4 += 1;
     println!("{N4}")
 }
-
-
----
-
-
-// turn off underline for variable in VSCode
-// https://code.visualstudio.com/docs/languages/rust#_semantic-syntax-highlighting ,
-"editor.semanticHighlighting.enabled": false,
 
 
 ---
@@ -707,18 +702,6 @@ fn main() {
     // let _ = age3;
 
 }
-
-
----
-
-
-VSCode shortcuts // UTF-8
-
-Trigger suggestion       : Cmd I
-Trigger suggestion       : Option Esc
-Trigger parameter hints  : Shift Cmd Space
-Format                   : Shift Option F
-Show integrated terminal : Ctrl `
 
 
 ---
@@ -833,6 +816,51 @@ fn main() {
 }
 
 
+
+---
+
+
+fn main() {
+    // Result
+
+    let result: Result<i32, &str> = Ok(123);
+    // let result: Result<i32, &str> = Err("Error message");
+
+    if let Ok(value) = result {
+        println!("result: {}", value);
+    }
+    if let Err(e) = result {
+        println!("is_err: {e}");
+    }
+
+    if result.is_ok() {
+        println!("result: {}", result.unwrap());
+    }
+    if result.is_err() {
+        println!("is_err: {}", result.unwrap_err());
+    }
+
+    // Option
+
+    let option: Option<i32> = Some(123);
+    // let option: Option<i32> = None;
+
+    if let Some(value) = option {
+        println!("option: {}", value);
+    }
+    if let None = option {
+        println!("is_none");
+    }
+
+    if option.is_some() {
+        println!("option: {}", option.unwrap());
+    }
+    if option.is_none() {
+        println!("is_none");
+    }
+}
+
+
 ---
 
 
@@ -867,50 +895,6 @@ fn main() {
 
 
 fn main() {
-    // Result
-
-    let result: Result<i32, &str> = Ok(123);
-    // let result: Result<i32, &str> = Err("Error message");
-
-    if result.is_ok() {
-        println2!("result: {}", result.unwrap());
-    }
-    if result.is_err() {
-        println2!("is_err: {}", result.unwrap_err());
-    }
-
-    if let Ok(value) = result {
-        println2!("result: {}", value);
-    }
-    if let Err(e) = result {
-        println2!("is_err: {e}");
-    }
-
-    // Option
-
-    let option: Option<i32> = Some(123);
-    // let option: Option<i32> = None;
-
-    if option.is_some() {
-        println2!("option: {}", option.unwrap());
-    }
-    if option.is_none() {
-        println2!("is_none");
-    }
-
-    if let Some(value) = option {
-        println2!("option: {}", value);
-    }
-    if let None = option {
-        println2!("is_none");
-    }
-}
-
-
----
-
-
-fn main() {
     // &str string slice is immutable by default.
     // to_lowercase() returns a temporary object
     // which goes out of scope before the temporary is assigned.
@@ -922,13 +906,13 @@ fn main() {
     // 2. ok
     let mut a = String::from("ABcd");
     a = a.to_lowercase();
-    println2!("{}", a);
+    println!("{}", a);
 
     // 3. ok
     let a = "ABcd".to_lowercase();
     let b = &a; // ok.
     let b = a.as_str(); // ok.
-    println2!("{b}");
+    println!("{b}");
 
 }
 
@@ -941,7 +925,9 @@ fn main() {
 
 fn main() {
     // let hello = "Здравствуйте";
-    // let s = &hello[0..1]; // error: byte index 1 is not a char boundary; it is inside 'З' (bytes 0..2) of `Здравствуйте`
+    // let s = &hello[0..1];
+
+    // error: byte index 1 is not a char boundary; it is inside 'З' (bytes 0..2) of `Здравствуйте`
     // println!("{s}");
 
     let v: Vec<char> = "Здравствуйте".chars().collect();

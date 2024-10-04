@@ -1,0 +1,193 @@
+<html>
+
+<head>
+    <style>
+        /* https://developer.mozilla.org/en-US/docs/Web/CSS/color-scheme */
+        :root {
+            color-scheme: light dark
+        }
+    </style>
+</head>
+
+<body>
+
+    <textarea disabled style="
+    border: none;
+    font-family: monospace;
+    font-size: inherit;
+    height: 100%;
+    overflow-wrap: break-word;
+    resize: none;
+    width: 100%;">
+
+
+give me a summary in rust lang:
+
+for types or collections: string, vector, slice,
+how the sorting or searching through themselves,
+or how the sorting or searching through iterator from them.
+all with small code examples.
+
+```
+. sorting (if applicable);
+. binary search (return boolean result or index);
+. partition point to identify the range if there are multiple occurrences;
+. checking if it has an element; (return boolean result or index)
+. checking if it has sub-string, or consecutive sub-sequence;
+. searching for or finding an single element and return index;
+. searching for or finding sub-string, or consecutive sub-sequence and return index;
+```
+
+
+---
+
+
+Here's a summary in Rust demonstrating sorting and searching operations for
+collections like strings, vectors, and slices. Each operation includes small
+code examples.
+
+1. Sorting
+
+Vectors
+
+You can sort a vector using the sort method:
+
+fn main() {
+    let mut vec = vec![3, 1, 2];
+    vec.sort();
+    println!("{:?}", vec); // Output: [1, 2, 3]
+}
+
+Strings
+
+You can sort the characters of a string by converting it into a vector of characters:
+
+fn main() {
+    let mut s = String::from("dcba");
+    let mut chars: Vec<char> = s.chars().collect();
+    chars.sort();
+    let sorted_string: String = chars.iter().collect();
+    println!("{}", sorted_string); // Output: abcd
+}
+
+2. Binary Search
+
+Vectors
+
+You can perform a binary search on a sorted vector to find an index of an element:
+
+fn main() {
+    let vec = vec![1, 2, 3, 4, 5];
+    match vec.binary_search(&3) {
+        Ok(index) => println!("Found at index: {}", index), // Output: Found at index: 2
+        Err(_) => println!("Not found"),
+    }
+}
+
+3. Partition Point (Finding Range)
+
+// std/primitive.slice.html#method.partition_point
+
+To identify the range of occurrences, you can use iter().position() combined with a loop:
+
+fn main() {
+    let haystack = [1, 2, 3, 3, 3, 4, 5];
+    let needle = 3;
+
+    let begin = haystack.partition_point(|x| x < &needle);
+    let end = haystack.partition_point(|x| x <= &needle);
+    if begin == end {
+        dbg!(format_args!("not found, {}, {}", begin, end));
+    } else {
+        dbg!(format_args!("found, {}, {}", begin, end));
+    }
+}
+
+4. Checking if It Has an Element
+
+You can check for the presence of an element and return its index:
+
+Vectors
+
+fn main() {
+    let vec = vec![10, 20, 30, 40, 50];
+    let index = vec.iter().position(|&x| x == 30);
+    match index {
+        Some(i) => println!("Element found at index: {}", i), // Output: Element found at index: 2
+        None => println!("Element not found"),
+    }
+}
+
+Strings
+
+For substring checking:
+
+fn main() {
+    let s = String::from("Hello, world!");
+    let has_substring = s.contains("world");
+    println!("{}", has_substring); // Output: true
+}
+
+5. Searching for a Single Element
+
+You can find the index of a single element:
+
+fn main() {
+    let vec = vec![10, 20, 30, 40, 50];
+    if let Some(index) = vec.iter().position(|&x| x == 30) {
+        println!("Found at index: {}", index); // Output: Found at index: 2
+    } else {
+        println!("Not found");
+    }
+}
+
+6. Searching for a Substring or Consecutive Sub-sequence
+
+Strings
+
+To find the starting index of a substring:
+
+fn main() {
+    let s = String::from("Hello, world!");
+    if let Some(index) = s.find("world") {
+        println!("Substring found at index: {}", index); // Output: Substring found at index: 7
+    } else {
+        println!("Substring not found");
+    }
+}
+
+Vectors
+
+Finding a subarray (consecutive sequence):
+
+fn main() {
+    let vec = vec![1, 2, 3, 4, 5];
+    let sub_vec = vec![3, 4];
+
+    if let Some(position) = vec.windows(sub_vec.len()).position(|window| window == sub_vec) {
+        println!("Sub-sequence found at index: {}", position); // Output: Sub-sequence found at index: 2
+    } else {
+        println!("Sub-sequence not found");
+    }
+}
+
+This summary provides an overview of how to sort and search through
+strings, vectors, and slices in Rust, along with practical code examples for
+each operation listed.
+
+
+---
+
+
+
+
+
+
+---
+
+
+  </textarea>
+
+</body>
+
+</html>

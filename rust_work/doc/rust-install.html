@@ -455,7 +455,7 @@ foo::hello(); // just use name directly
 // let name = "abc"
 // let num = 123
 
-// dbg!(format!("{}, {}", name, num));
+// dbg!(format_args!("{}, {}", name, num));
 // dbg2!("{}, {}", name, num);
 macro_rules! dbg2 {
     ($($args:tt)*) => {

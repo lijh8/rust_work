@@ -256,9 +256,6 @@ dependencies = [
 [[package]]
 name = "main"
 version = "0.1.0"
-dependencies = [
- "log2",
-]
 
 [[package]]
 name = "memchr"

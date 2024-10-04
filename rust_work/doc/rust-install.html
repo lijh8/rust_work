@@ -471,8 +471,8 @@ macro_rules! println2 {
 }
 
 /*
-[main/src/main.rs:1:5] format!("{}, {}", name, num) = "abc, 123"
-[main/src/main.rs:2:5] format! ("{}, {}", name, num) = "abc, 123"
+[main/src/main.rs:1:5] format_args!("{}, {}", name, num) = "abc, 123"
+[main/src/main.rs:2:5] format_args! ("{}, {}", name, num) = "abc, 123"
 main/src/main.rs:19: abc, 123
 */
 
@@ -497,29 +497,29 @@ fn main() {
     let v = vec![1, 2, 3];
     let a = [1, 2, 3];
 
-    dbg!(format!("{}", type_name2!(v)));
-    dbg!(format!("{}", type_name2!(a)));
-    dbg!(format!("{}", type_name2!(&v)));
-    dbg!(format!("{}", type_name2!(&a)));
-    dbg!(format!("{}", type_name2!(&v[..])));
-    dbg!(format!("{}", type_name2!(&a[..])));
+    dbg!(format_args!("{}", type_name2!(v)));
+    dbg!(format_args!("{}", type_name2!(a)));
+    dbg!(format_args!("{}", type_name2!(&v)));
+    dbg!(format_args!("{}", type_name2!(&a)));
+    dbg!(format_args!("{}", type_name2!(&v[..])));
+    dbg!(format_args!("{}", type_name2!(&a[..])));
 
-    dbg!(format!("{}", type_name2!(v[..]))); // ?Sized
-    dbg!(format!("{}", type_name2!(a[..]))); // ?Sized
+    dbg!(format_args!("{}", type_name2!(v[..]))); // ?Sized
+    dbg!(format_args!("{}", type_name2!(a[..]))); // ?Sized
 
     let a2 = a;
     let v2 = v;
 }
 
 /*
-[main/src/main.rs:16:5] format!("{}", type_name2!(v)) = "alloc::vec::Vec<i32>"
-[main/src/main.rs:17:5] format!("{}", type_name2!(a)) = "[i32; 3]"
-[main/src/main.rs:18:5] format!("{}", type_name2!(&v)) = "&alloc::vec::Vec<i32>"
-[main/src/main.rs:19:5] format!("{}", type_name2!(&a)) = "&[i32; 3]"
-[main/src/main.rs:20:5] format!("{}", type_name2!(&v[..])) = "&[i32]"
-[main/src/main.rs:21:5] format!("{}", type_name2!(&a[..])) = "&[i32]"
-[main/src/main.rs:23:5] format!("{}", type_name2!(v[..])) = "[i32]"
-[main/src/main.rs:24:5] format!("{}", type_name2!(a[..])) = "[i32]"
+[main/src/main.rs:16:5] format_args!("{}", type_name2!(v)) = "alloc::vec::Vec<i32>"
+[main/src/main.rs:17:5] format_args!("{}", type_name2!(a)) = "[i32; 3]"
+[main/src/main.rs:18:5] format_args!("{}", type_name2!(&v)) = "&alloc::vec::Vec<i32>"
+[main/src/main.rs:19:5] format_args!("{}", type_name2!(&a)) = "&[i32; 3]"
+[main/src/main.rs:20:5] format_args!("{}", type_name2!(&v[..])) = "&[i32]"
+[main/src/main.rs:21:5] format_args!("{}", type_name2!(&a[..])) = "&[i32]"
+[main/src/main.rs:23:5] format_args!("{}", type_name2!(v[..])) = "[i32]"
+[main/src/main.rs:24:5] format_args!("{}", type_name2!(a[..])) = "[i32]"
 */
 
 
@@ -549,10 +549,10 @@ use log4rs::{
 pub fn init_logging(dir: &str, name: &str) -> Result<(), SetLoggerError> {
     const TRIGGER_FILE_SIZE: u64 = 1024u64 * 1024 * 1;
     const LOG_FILE_COUNT: u32 = 10;
-    let file_path: &str = &format!("{dir}/{name}.log");
+    let file_path: &str = &format_args!("{dir}/{name}.log");
 
     // https://docs.rs/log4rs/*/log4rs/append/rolling_file/policy/compound/roll/fixed_window/struct.FixedWindowRollerBuilder.html#method.build ,
-    let archive_pattern: &str = &format!("{dir}/{name}.{{}}.log");
+    let archive_pattern: &str = &format_args!("{dir}/{name}.{{}}.log");
 
     // https://docs.rs/log4rs/latest/log4rs/encode/pattern/index.html ,
     let pattern = "{d} {l} {file}:{line} - {m}\n";
@@ -870,24 +870,24 @@ fn main() {
     let text = "123";
     let parse = text.parse::<i32>();
     let Ok(num) = parse.as_ref() else {
-        dbg!(format!("{}", parse.as_ref().unwrap_err()));
+        dbg!(format_args!("{}", parse.as_ref().unwrap_err()));
         return;
     };
-    dbg!(format!("{}, {}", text, num));
+    dbg!(format_args!("{}, {}", text, num));
 
     let text = "abc";
     let parse = text.parse::<i32>();
     let Ok(num) = parse.as_ref() else {
-        dbg!(format!("{}", parse.as_ref().unwrap_err()));
+        dbg!(format_args!("{}", parse.as_ref().unwrap_err()));
         return;
     };
 
-    dbg!(format!("{}, {}", text, num));
+    dbg!(format_args!("{}, {}", text, num));
 }
 
 /*
-[main/src/main.rs:17:5] format!("{}, {}", text, num) = "123, 123"
-[main/src/main.rs:22:9] format!("{}", parse.as_ref().unwrap_err()) = "invalid digit found in string"
+[main/src/main.rs:17:5] format_args!("{}, {}", text, num) = "123, 123"
+[main/src/main.rs:22:9] format_args!("{}", parse.as_ref().unwrap_err()) = "invalid digit found in string"
  */
 
 
@@ -1302,6 +1302,118 @@ index out of bounds: the len is 4 but the index is 10.
 
 Hash maps are useful when you want to look up data not by using an index,
 as you can with vectors, but by using a key that can be of any type.
+
+
+---
+
+
+// unit tests, integration tests
+
+$ pwd
+/Users/ljh/Documents/rust_work/main
+$
+$ find . -print | sed -e 's;[^/]*/;|____;g;s;____|; |;g'
+
+.
+|____Cargo.toml
+|____tests
+| |____integration_test2.rs
+|____src
+| |____tests2.rs
+| |____lib.rs
+| |____add2.rs
+| |____main.rs
+$
+$ ls
+Cargo.toml      src             tests
+$
+$ ls src
+add2.rs         lib.rs          main.rs         tests2.rs
+$
+$ ls tests
+integration_test2.rs
+$
+
+$ cat Cargo.toml
+[package]
+name = "main"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+# log2 = {path = "../log2"}
+$
+
+$ cat src/add2.rs
+pub fn add2(a: i32, b: i32) -> i32 {
+    dbg!(format_args!("{}", a + b));
+    a + b
+}
+$
+
+$ cat src/lib.rs
+pub mod add2;
+
+#[cfg(test)]
+pub mod tests2;
+
+pub fn add(a: i32, b: i32) -> i32 {
+    dbg!(format_args!("{}", a + b));
+    a + b
+}
+$
+
+$ cat src/main.rs
+use main::add;
+use main::add2::add2;
+
+fn main() {
+    let sum = add(1, 2);
+    dbg!(format_args!("{}", sum));
+    let sum = add2(1, 2);
+    dbg!(format_args!("{}", sum));
+}
+$
+
+$ cat src/tests2.rs
+use super::add2::*;
+use super::*;
+
+#[test]
+fn ut_add() {
+    assert_eq!(add(1, 2), 3);
+}
+
+#[test]
+fn ut_add2() {
+    assert_eq!(add2(1, 2), -3); // false test
+}
+$
+
+$ cat tests/integration_test2.rs
+use main::add;
+use main::add2::add2;
+
+#[test]
+fn it_add() {
+    assert_eq!(add(1, 2), 3);
+}
+
+#[test]
+fn it_add2() {
+    assert_eq!(add2(1, 2), -3); // false test
+}
+$
+
+$ cargo test
+test tests2::ut_add ... ok
+test tests2::ut_add2 ... FAILED
+$
+
+$ cargo test --test integration_test2
+test it_add ... ok
+test it_add2 ... FAILED
+$
 
 
 ---

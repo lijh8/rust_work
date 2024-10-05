@@ -2,6 +2,6 @@
 resolver = "2"
 members = [
     "main",
-#    "log2",
+    "log2",
     "mod",
 ]

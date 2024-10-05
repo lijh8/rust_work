@@ -405,7 +405,7 @@ which is src/main.rs.
 additional source files with main function should be in `src/bin/main2.rs` sub-directory.
 
 a package has more than one binary crates means that when the package is built,
-it generates more than one executable binary in ` ./target/ `.
+it generates more than one executable binary in ` ./target/ ` using ` cargo build ` .
 this is the meaning of more than one binary crates.
 
 and for a package can generates more than one binary crates,
@@ -420,16 +420,89 @@ a package has at most one library crate means that when the package is built,
 it generates at most one library. there can be more files like
 src/lib.rs, src/lib2.rs, src/lib2/lib3.rs,
 they do not contain main function, and together they are built into one library
-in `./target/` too.
+in ` ./target/ ` too using ` cargo build `.
 
 
 ```
 foo/src/main.rs,
 foo/src/bin/main2.rs,
+foo/src/bin/main3.rs,
 foo/src/lib.rs,
 foo/src/lib2.rs,
 foo/src/lib2/lib3.rs,
 ```
+
+
+---
+
+
+When a package contains only binary crate:
+
+if additional binary crates are needed,
+they all should be placed in `src/bin/main2.rs`:
+
+// $ cargo run --bin main
+// $ cargo run --bin main2
+
+$ find . -print | sed -e 's;[^/]*/;|____;g;s;____|; |;g'
+
+|____src
+| |____bin
+| | |____main2.rs
+| |____main.rs
+
+
+$ ls -l target/debug
+-rwxr-xr-x    1 ljh  staff  471288 Oct  5 15:30 main
+-rwxr-xr-x    1 ljh  staff  471264 Oct  5 15:32 main2
+$
+
+
+---
+
+
+When a package contains binary crate and library crate:
+
+$ find . -print | sed -e 's;[^/]*/;|____;g;s;____|; |;g'
+
+|____src
+| |____bin
+| | |____main2.rs
+| |____lib.rs
+| |____add2.rs
+| |____main.rs
+
+$ ls -l target/debug
+-rw-r--r--    1 ljh  staff   38448 Oct  5 15:32 libmain.rlib
+-rwxr-xr-x    1 ljh  staff  471264 Oct  5 15:32 main
+-rwxr-xr-x    1 ljh  staff  471264 Oct  5 15:32 main2
+$
+
+
+---
+
+
+// static dynamic linking
+
+// $ ldd target/debug/main
+// $ otool -L target/debug/main
+// $ nm -C libfoo.lib
+// $ objdump -t libfoo.lib
+// $ readelf -s libfoo.lib
+
+// The Cargo Book, 3.2 The Manifest Format: ./rust/html/cargo/reference/manifest.html ,
+// The Cargo Book, 3.2.1 Cargo Targets: ./cargo/reference/cargo-targets.html#library ,
+
+// The Rust Reference, 14 Linkage: ./reference/linkage.html?highlight=creat-type#linkage ,
+// The available options are bin, lib, rlib, dylib, cdylib, staticlib, and proc-macro.
+
+# Cargo.toml:
+
+[package]
+
+[lib]
+crate-type = ["cdylib"]
+bench = false
 
 
 ---

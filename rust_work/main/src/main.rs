@@ -1,9 +1,23 @@
-// use main::add;
-// use main::add2::add2;
-
 fn main() {
-    // let sum = add(1, 2);
-    // dbg!(format_args!("{}", sum));
-    // let sum = add2(1, 2);
-    // dbg!(format_args!("{}", sum));
+    // let option: Option<i32> = Some(123);
+    let option: Option<i32> = None;
+
+    if let Some(a) = option {
+        println!("{}", a);
+    }
+    println!("test");
+
+    // if let Some(value) = option {
+    //     println!("option: {}", value);
+    // }
+    // if let None = option {
+    //     println!("is_none");
+    // }
+
+    // if option.is_some() {
+    //     println!("option: {}", option.unwrap());
+    // }
+    // if option.is_none() {
+    //     println!("is_none");
+    // }
 }

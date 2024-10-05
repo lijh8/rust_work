@@ -247,6 +247,27 @@ $ cargo test
 ---
 
 
+crate:
+is like the target in Makefile, built from c++ source files;
+it can be library and executable;
+src/lib.rs is library crate root file;
+src/main.rs is binary crate root file;
+
+package:
+is like the build system and manages dependency with Cargo.toml;
+
+module:
+is a source file if do not define inline module;
+declare module using ` mod foo; `, no braces.
+define inline moudle using ` mod foo {} `, with braces.
+non-main modules files should be declared in src/lib.rs library crate root file;
+submodules files should be declared in file with same name as the sub-directory;
+names only visible inside same module file by default;
+
+
+---
+
+
 Managing Growing Projects with Packages, Crates, and Modules ,
 
 https://doc.rust-lang.org/book/ch07-00-managing-growing-projects-with-packages-crates-and-modules.html ,
@@ -1579,6 +1600,12 @@ pub fn add(a: i32, b: i32) -> i32 {
 $
 
 $ cat src/main.rs
+
+// src/main.rs is binary crate. src/lib.rs is library crate.
+// they are different crates, so, in src/main.rs,
+// can not do use keywords: crate, super: ` use crate::foo `.
+// instead, use through package name: ` use pack_name::foo `
+
 use main::add;
 use main::add2::add2;
 

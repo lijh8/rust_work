@@ -10,14 +10,8 @@
 //
 
 fn main() {
-    // let text = "a123"; // "abc123"
-    // let mut num;
-
-    // if let Err(e) = text.parse::<i32>() {
-    //     num = 0;
-    //     return;
-    // }
-    // num = text.parse().unwrap();
-
-    // dbg!(format_args!("{}", num));
+    let mut c = 10;
+    c = c + 1;
+    c = c + 2;
+    dbg!(format_args!("{}", c));
 }

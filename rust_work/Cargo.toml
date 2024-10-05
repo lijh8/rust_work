@@ -4,5 +4,5 @@ members = [
     "main",
     "log2",
     "mod2",
-    "test2",
+    "test4",
 ]

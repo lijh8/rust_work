@@ -497,7 +497,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "test2"
+name = "test4"
 version = "0.1.0"
 dependencies = [
  "log2",

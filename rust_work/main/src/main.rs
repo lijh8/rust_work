@@ -1,23 +1,10 @@
 fn main() {
-    // let option: Option<i32> = Some(123);
-    let option: Option<i32> = None;
+    let haystack = vec![1, 2, 3, 2, 3, 4, 5];
+    let needle = 2;
 
-    if let Some(a) = option {
-        println!("{}", a);
+    for (index, &value) in haystack.iter().enumerate() {
+        if value == needle {
+            println!("Found {} at index: {}", needle, index);
+        }
     }
-    println!("test");
-
-    // if let Some(value) = option {
-    //     println!("option: {}", value);
-    // }
-    // if let None = option {
-    //     println!("is_none");
-    // }
-
-    // if option.is_some() {
-    //     println!("option: {}", option.unwrap());
-    // }
-    // if option.is_none() {
-    //     println!("is_none");
-    // }
 }

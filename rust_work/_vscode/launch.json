@@ -7,6 +7,25 @@
         {
             "type": "lldb",
             "request": "launch",
+            "name": "Debug unit tests in library 'main'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--lib",
+                    "--package=main"
+                ],
+                "filter": {
+                    "name": "main",
+                    "kind": "lib"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
             "name": "Debug executable 'main'",
             "cargo": {
                 "args": [
@@ -36,6 +55,62 @@
                 "filter": {
                     "name": "main",
                     "kind": "bin"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug executable 'main2'",
+            "cargo": {
+                "args": [
+                    "build",
+                    "--bin=main2",
+                    "--package=main"
+                ],
+                "filter": {
+                    "name": "main2",
+                    "kind": "bin"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests in executable 'main2'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--bin=main2",
+                    "--package=main"
+                ],
+                "filter": {
+                    "name": "main2",
+                    "kind": "bin"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug integration test 'integration_test2'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--test=integration_test2",
+                    "--package=main"
+                ],
+                "filter": {
+                    "name": "integration_test2",
+                    "kind": "test"
                 }
             },
             "args": [],
@@ -92,6 +167,118 @@
                 "filter": {
                     "name": "mod",
                     "kind": "bin"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests in library 'test2'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--lib",
+                    "--package=test2"
+                ],
+                "filter": {
+                    "name": "test2",
+                    "kind": "lib"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug executable 'main2'",
+            "cargo": {
+                "args": [
+                    "build",
+                    "--bin=main2",
+                    "--package=test2"
+                ],
+                "filter": {
+                    "name": "main2",
+                    "kind": "bin"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests in executable 'main2'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--bin=main2",
+                    "--package=test2"
+                ],
+                "filter": {
+                    "name": "main2",
+                    "kind": "bin"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug executable 'test2'",
+            "cargo": {
+                "args": [
+                    "build",
+                    "--bin=test2",
+                    "--package=test2"
+                ],
+                "filter": {
+                    "name": "test2",
+                    "kind": "bin"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests in executable 'test2'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--bin=test2",
+                    "--package=test2"
+                ],
+                "filter": {
+                    "name": "test2",
+                    "kind": "bin"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug integration test 'integration_test4'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--test=integration_test4",
+                    "--package=test2"
+                ],
+                "filter": {
+                    "name": "integration_test4",
+                    "kind": "test"
                 }
             },
             "args": [],

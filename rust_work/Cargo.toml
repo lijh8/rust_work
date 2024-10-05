@@ -3,5 +3,6 @@ resolver = "2"
 members = [
     "main",
     "log2",
-    "mod",
+    "mod2",
+    "test2",
 ]

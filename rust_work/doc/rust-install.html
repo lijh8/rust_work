@@ -1289,6 +1289,19 @@ struct Foo {
 ---
 
 
+Equality operators == , != ;
+relationship ordering operators < , > ;
+
+- `Eq` and `Ord` cannot be with types may have non-equivalent or non-comparable values like `NaN` or infinity;
+    attempting to implement these traits for such types will result in a compile-time error.
+
+- `PartialEq` returns `false` if any operand is non-equivalent, such as `NaN` (e.g., `NaN == NaN` is `false`).
+- `PartialOrd` returns `None` if any operand is non-comparable, such as `NaN` (e.g., `NaN < 5.0` returns `None`).
+
+
+---
+
+
 fn main() {
     // change character in string by replace_range
     let mut s = String::from("hello");

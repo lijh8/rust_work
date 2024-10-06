@@ -10,8 +10,22 @@
 //
 
 fn main() {
-    let mut c = 10;
-    c = c + 1;
-    c = c + 2;
-    dbg!(format_args!("{}", c));
+    {
+        let a = String::from("abc");
+        let b = String::from("abc");
+        let c = a == b;
+        a;
+        b;
+        // let a2 = a;
+        // let b2 = b;
+        dbg!(format_args!("{}, {}, {}", a, b, c));
+    }
+    {
+        let a = "abc";
+        let b = "abc";
+        let c = a == b;
+        // let a2 = a;
+        // let b2 = b;
+        dbg!(format_args!("{}, {}, {}", a, b, c));
+    }
 }

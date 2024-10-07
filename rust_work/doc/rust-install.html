@@ -971,6 +971,20 @@ struct People {
 ---
 
 
+{
+    // tuple equality and comparision support max 12 elements
+    // use nested tuple to work around this problem.
+    let a = (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, (12, 13, 14, 15));
+    let b = (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, (12, 13, 14, 15));
+    // let c = a == b; // tuple max elements 12
+    // let d = a < b; // tuple max elements 12
+    // dbg!(format_args!("{:?}", a)); // tuple max elements 12
+}
+
+
+---
+
+
 fn main() {
     let s1 = "hello".to_string();
     let s2 = s1;
@@ -1485,20 +1499,21 @@ fn longest<'a>(x: &'a str, y: &'a str) -> &'a str {
 
 The function signature now tells Rust that for some lifetime 'a, the function
 takes two parameters, both of which are string slices that live at least as long
-as lifetime 'a. The function signature also tells Rust that the string slice
-returned from the function will live at least as long as lifetime 'a. In
-practice, it means that the lifetime of the reference returned by the longest
-function is the same as the smaller of the lifetimes of the values referred to
-by the function arguments. These relationships are what we want Rust to use when
-analyzing this code.
+as lifetime 'a.
+The function signature also tells Rust that the string slice returned from the
+function will live at least as long as lifetime 'a. In practice, it means that
+the lifetime of the reference returned by the longest function is the same as
+the smaller of the lifetimes of the values referred to by the function
+arguments.
+These relationships are what we want Rust to use when analyzing this code.
 
 Remember, when we specify the lifetime parameters in this function signature,
 we’re not changing the lifetimes of any values passed in or returned. Rather,
 we’re specifying that the borrow checker should reject any values that don’t
 adhere to these constraints.
 
-The lifetime annotations become part of the contract of the function,
-much like the types in the signature.
+The lifetime annotations become part of the contract of the function, much like
+the types in the signature.
 Having function signatures contain the lifetime contract means the analysis the
 Rust compiler does can be simpler.
 
@@ -1518,15 +1533,17 @@ valid until the end of the outer scope.
 Rust knows this because we annotated the lifetimes of the function parameters
 and return values using the same lifetime parameter 'a.
 
-
 We’ve told Rust that the lifetime of the reference returned by the longest
-function is the same as the smaller of the lifetimes of the references passed in.
+function is the same as the smaller of the lifetimes of the references passed
+in.
 Therefore, the borrow checker disallows the code as possibly having an invalid
 reference.
 
-Ultimately, lifetime syntax is about connecting the lifetimes of various parameters and return values of functions.
-Once they’re connected, Rust has enough information to allow memory-safe operations
-and disallow operations that would create dangling pointers or otherwise violate memory safety.
+Ultimately, lifetime syntax is about connecting the lifetimes of various
+parameters and return values of functions.
+Once they’re connected, Rust has enough information to allow memory-safe
+operations and disallow operations that would create dangling pointers or
+otherwise violate memory safety.
 
 
 ---

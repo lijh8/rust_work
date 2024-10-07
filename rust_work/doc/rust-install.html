@@ -249,6 +249,7 @@ $ cargo test
 
 crate:
 is like the target in Makefile, built from c++ source files;
+it is also the source files which are used to build the target;
 it can be library and executable;
 src/lib.rs is library crate root file;
 src/main.rs is binary crate root file;
@@ -1451,6 +1452,23 @@ instead of being called a shallow copy, it is known as a move.
 ---
 
 
+// temporary value is freed at the end of this statement
+{
+    let a = String::from("abc").as_str();   // err
+    dbg!(a);
+}
+
+// consider using a `let` binding to create a longer lived value
+{
+    let s1 = String::from("abc");
+    let a = s1.as_str();                    // ok
+    dbg!(a);
+}
+
+
+---
+
+
 The Rust Programming Language, 10.3:
 
 We want the signature to express the following constraint: the returned
@@ -1478,6 +1496,99 @@ Remember, when we specify the lifetime parameters in this function signature,
 we’re not changing the lifetimes of any values passed in or returned. Rather,
 we’re specifying that the borrow checker should reject any values that don’t
 adhere to these constraints.
+
+The lifetime annotations become part of the contract of the function,
+much like the types in the signature.
+Having function signatures contain the lifetime contract means the analysis the
+Rust compiler does can be simpler.
+
+
+fn main() {
+    let string1 = String::from("long string is long");
+    let result;
+    {
+        let string2 = String::from("xyz");
+        result = longest(string1.as_str(), string2.as_str());
+    }
+    println!("The longest string is {result}");
+}
+
+for result to be valid for the println! statement, string2 would need to be
+valid until the end of the outer scope.
+Rust knows this because we annotated the lifetimes of the function parameters
+and return values using the same lifetime parameter 'a.
+
+
+We’ve told Rust that the lifetime of the reference returned by the longest
+function is the same as the smaller of the lifetimes of the references passed in.
+Therefore, the borrow checker disallows the code as possibly having an invalid
+reference.
+
+Ultimately, lifetime syntax is about connecting the lifetimes of various parameters and return values of functions.
+Once they’re connected, Rust has enough information to allow memory-safe operations
+and disallow operations that would create dangling pointers or otherwise violate memory safety.
+
+
+---
+
+
+fn longest<'a>(x: &'a str, y: &'a str) -> &'a str {
+    if x.len() > y.len() {
+        x
+    } else {
+        y
+    }
+}
+
+// rust-by-example/scope/lifetime/explicit.html, 15.4 Explicit annotation,
+
+fn first<'a, 'b>(x: &'a str, y: &'b str) -> &'a str {
+    x
+}
+
+fn last<'a, 'b>(x: &'a str, y: &'b str) -> &'b str {
+    y
+}
+
+fn main() {
+    {
+        let string1 = String::from("abcd");
+        let string2 = "xyz";
+        let result = longest(string1.as_str(), string2);
+        dbg!(format_args!("The longest string is {result}"));
+    }
+
+    {
+        let string1 = String::from("long string is long");
+        {
+            let string2 = String::from("xyz");
+            let result = longest(string1.as_str(), string2.as_str());
+            dbg!(format_args!("The longest string is {result}"));
+        }
+    }
+
+    {
+        let string1 = String::from("long string is long");
+        let result;
+        {
+            let string2 = String::from("xyz");
+            // result = longest(string1.as_str(), string2.as_str()); // err
+            result = first(string1.as_str(), string2.as_str()); // ok
+        }
+        dbg!(format_args!("The longest string is {result}"));
+    }
+
+    {
+        let string2 = String::from("xyz");
+        let result;
+        {
+            let string1 = String::from("long string is long");
+            // result = longest(string1.as_str(), string2.as_str()); // err
+            result = last(string1.as_str(), string2.as_str()); // ok
+        }
+        dbg!(format_args!("The longest string is {result}"));
+    }
+}
 
 
 ---
@@ -1673,6 +1784,30 @@ $
 
 ---
 
+
+// Crate std, The Rust Standard Library
+
+// std/ops/index.html,
+
+the assignment operator (=) has no backing trait,
+there is no way of overloading its semantics.
+
+
+Many of the operators take their operands by value.
+In non-generic contexts involving built-in types, this is usually not a problem.
+However, using these operators in generic code,
+requires some attention if values have to be reused as opposed to letting the
+operators consume them. One option is to occasionally use clone.
+
+Another option is to rely on the types involved providing additional operator
+implementations for references.
+For example, for a user-defined type T which is supposed to support addition,
+it is probably a good idea to have both T and &T implement
+the traits Add<T> and Add<&T> so that generic code can be written
+without unnecessary cloning.
+
+
+---
 
 
 

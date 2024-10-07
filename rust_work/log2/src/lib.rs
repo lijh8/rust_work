@@ -4,8 +4,8 @@
 // $ cd /path/to/mymodule  # package directory with cargo.toml
 // $ cargo add log4rs log  # it will add dependencies and edit cargo.toml
 
-use log::LevelFilter;
 pub use log::{debug, error, info, trace, warn};
+use log::{LevelFilter, SetLoggerError};
 use log4rs::{
     append::{
         console::{ConsoleAppender, Target},
@@ -18,7 +18,7 @@ use log4rs::{
     filter::threshold::ThresholdFilter,
 };
 
-pub fn init_logging(dir: &str, name: &str) -> Result<(), Box<dyn std::error::Error>> {
+pub fn init_logging(dir: &str, name: &str) -> Result<(), SetLoggerError> {
     const TRIGGER_FILE_SIZE: u64 = 1024u64 * 1024 * 1;
     const LOG_FILE_COUNT: u32 = 10;
     let file_path: &str = &format!("{dir}/{name}.log");
@@ -30,14 +30,17 @@ pub fn init_logging(dir: &str, name: &str) -> Result<(), Box<dyn std::error::Err
     let pattern = "{d} {l} {file}:{line} - {m}\n";
 
     let trigger = SizeTrigger::new(TRIGGER_FILE_SIZE);
-    let roller = FixedWindowRoller::builder().build(archive_pattern, LOG_FILE_COUNT)?;
+    let roller = FixedWindowRoller::builder()
+        .build(archive_pattern, LOG_FILE_COUNT)
+        .unwrap();
     let policy = CompoundPolicy::new(Box::new(trigger), Box::new(roller));
 
     // Pattern: https://docs.rs/log4rs/*/log4rs/encode/pattern/index.html ,
     // Logging to log file. (with rolling)
     let logfile = log4rs::append::rolling_file::RollingFileAppender::builder()
         .encoder(Box::new(PatternEncoder::new(pattern)))
-        .build(file_path, Box::new(policy))?;
+        .build(file_path, Box::new(policy))
+        .unwrap();
 
     // Build a stderr logger.
     let stderr = ConsoleAppender::builder()
@@ -61,9 +64,10 @@ pub fn init_logging(dir: &str, name: &str) -> Result<(), Box<dyn std::error::Err
                 .appender("logfile")
                 .appender("stderr")
                 .build(LevelFilter::Trace),
-        )?;
+        )
+        .unwrap();
 
-    let _handle = log4rs::init_config(config)?;
+    let _handle = log4rs::init_config(config).unwrap();
     Ok(())
 }
 

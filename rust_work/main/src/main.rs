@@ -1,31 +1,31 @@
-// macro_rules! type_name2 {
-//     ($arg:expr) => {{
-//         fn type_name2<T: ?Sized>(_: &T) -> &str {
-//             std::any::type_name::<T>()
-//         }
-//         type_name2(&$arg)
-//     }};
-// }
+macro_rules! type_name2 {
+    ($arg:expr) => {{
+        fn type_name2<T: ?Sized>(_: &T) -> &str {
+            std::any::type_name::<T>()
+        }
+        type_name2(&$arg)
+    }};
+}
 
 //
 
+use log2::init_logging;
+use log2::{debug, error, info, trace, warn};
+
 fn main() {
-    {
-        let a = String::from("abc");
-        let b = String::from("abc");
-        let c = a == b;
-        a;
-        b;
-        // let a2 = a;
-        // let b2 = b;
-        dbg!(format_args!("{}, {}, {}", a, b, c));
-    }
-    {
-        let a = "abc";
-        let b = "abc";
-        let c = a == b;
-        // let a2 = a;
-        // let b2 = b;
-        dbg!(format_args!("{}, {}, {}", a, b, c));
+    let dir = "./logs";
+    let name = "foo";
+    let _ = match init_logging(dir, name) {
+        Ok(_) => (),
+        Err(e) => println!("{e}"),
+    };
+
+    // Generate some log messages to trigger rolling
+    loop {
+        error!("This is error message!");
+        warn!("This is warn message!");
+        info!("This is info message!");
+        debug!("This is debug message!");
+        trace!("This is trace message!");
     }
 }

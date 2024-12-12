@@ -268,6 +268,7 @@ $ cargo new foo --lib
 $ cargo build
 $ cargo build --release
 $ cargo run
+$ cargo run --bin main # under directory with workspace Cargo.toml
 $ cargo check
 $ ./target/debug/main
 $ cargo clean
@@ -668,6 +669,34 @@ macro_rules! println2 {
 [main/src/main.rs:2:5] format_args! ("{}, {}", name, num) = "abc, 123"
 main/src/main.rs:19: abc, 123
 */
+
+
+---
+
+
+chatGPT:
+
+Understanding Through println! Definition
+
+The definition of println! involves the macro expanding
+to use format_args_nl! and _print. Here's the relevant part:
+
+$crate::io::_print($crate::format_args_nl!($($arg)*));
+
+format_args_nl!:
+This macro takes the arguments and prepares them for formatting.
+When you pass a (a String),
+it processes it and ensures the correct type (a &str) is passed to the formatter.
+
+_print:
+This function is responsible for the actual printing.
+It takes the formatted arguments and writes them to the output stream.
+By this point, the value of a has already been coerced into &str by the formatting machinery.
+
+Thus, the println! macro does not directly "care" about the exact type of a
+beyond the requirements of the formatting machinery.
+The String is automatically coerced to &str because the formatting system
+expects a Display implementation for &str.
 
 
 ---
@@ -1412,6 +1441,25 @@ fn main() {
 ---
 
 
+https://doc.rust-lang.org/book/ch17-01-what-is-oo.html ,
+
+use trait for polymorphism or interface ,
+
+Polymorphism,
+
+To many people, polymorphism is synonymous with inheritance.
+But its actually a more general concept that refers to code that can
+work with data of multiple types.
+For inheritance, those types are generally subclasses.
+
+Rust instead uses generics to abstract over different possible types
+and trait bounds to impose constraints on what those types must provide.
+This is sometimes called bounded parametric polymorphism.
+
+
+---
+
+
 https://doc.rust-lang.org/rust-by-example/generics/bounds.html ,
 
 generics use trait to constrain type parameter,
@@ -1431,6 +1479,11 @@ fn printer<T: Display>(t: T) {
 }
 
 
+// https://docs.modular.com/mojo/manual/traits ,
+// Generic structs with traits,
+// You can also use traits when defining a generic container.
+
+
 ---
 
 
@@ -1443,25 +1496,6 @@ Traits,
 Of course traits can also be generic.
 Here we define one which reimplements the Drop trait as a generic method
 to drop itself and an input.
-
-
----
-
-
-https://doc.rust-lang.org/book/ch17-01-what-is-oo.html ,
-
-use trait for polymorphism or interface ,
-
-Polymorphism,
-
-To many people, polymorphism is synonymous with inheritance.
-But its actually a more general concept that refers to code that can
-work with data of multiple types.
-For inheritance, those types are generally subclasses.
-
-Rust instead uses generics to abstract over different possible types
-and trait bounds to impose constraints on what those types must provide.
-This is sometimes called bounded parametric polymorphism.
 
 
 ---

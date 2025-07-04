@@ -1891,6 +1891,91 @@ without unnecessary cloning.
 ---
 
 
+Learn Rust With Entirely Too Many Linked Lists ,
+Double Singly-Linked List ,
+or doubly-linked list ,
+
+https://rust-unofficial.github.io/too-many-lists/third-arc.html ,
+
+Interior mutability types violate this: they let you mutate through a shared
+reference. There are two major classes of interior mutability: cells, which
+only work in a single-threaded context; and locks, which work in a
+multi-threaded context. For obvious reasons, cells are cheaper when you can use
+them. There's also atomics, which are primitives that act like a lock.
+
+So what does all of this have to do with Rc and Arc? Well, they both use
+interior mutability for their reference count. Worse, this reference count is
+shared between every instance! Rc just uses a cell, which means it's not thread
+safe. Arc uses an atomic, which means it is thread safe. Of course, you can't
+magically make a type thread safe by putting it in Arc. Arc can only derive
+thread-safety like any other type.
+
+
+https://rust-unofficial.github.io/too-many-lists/fourth-building.html ,
+
+Shareable mutable containers.
+
+Values of the Cell<T> and RefCell<T> types may be mutated through shared
+references (i.e. the common &T type), whereas most Rust types can only be
+mutated through unique (&mut T) references. We say that Cell<T> and RefCell<T>
+provide 'interior mutability', in contrast with typical Rust types that exhibit
+'inherited mutability'.
+
+Cell types come in two flavors: Cell<T> and RefCell<T>. Cell<T> provides get
+and set methods that change the interior value with a single method call.
+Cell<T> though is only compatible with types that implement Copy. For other
+types, one must use the RefCell<T> type, acquiring a write lock before mutating.
+
+
+---
+
+
+https://doc.rust-lang.org/stable/book/ch04-02-references-and-borrowing.html ,
+
+Mutable references have one big restriction: if you have a mutable reference to
+a value, you can have no other references to that value. This code that
+attempts to create two mutable references to s will fail:
+
+```
+    let mut s = String::from("hello");
+
+    let r1 = &mut s;
+    let r2 = &mut s;
+
+    println!("{}, {}", r1, r2);
+```
+
+
+https://doc.rust-lang.org/stable/book/ch15-05-interior-mutability.html ,
+RefCell<T> and the Interior Mutability Pattern ,
+
+use std::cell::RefCell;
+use std::rc::Rc;
+
+fn main() {
+    let s = Rc::new(RefCell::new(String::from("hello")));
+
+    let s1 = Rc::clone(&s); // increases the reference count
+    let s2 = Rc::clone(&s); // increases the reference count
+
+    // These must be in separate scopes or explicitly dropped
+    {
+        let mut r1 = s1.borrow_mut();
+        r1.push_str(" world");
+    } // r1 goes out of scope here
+
+    {
+        let mut r2 = s2.borrow_mut();
+        r2.push_str(" again!");
+    }
+
+    println!("{}", s.borrow()); // prints "hello world again!"
+}
+
+
+---
+
+
 
 
 

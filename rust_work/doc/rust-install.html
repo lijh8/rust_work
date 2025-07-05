@@ -1949,27 +1949,68 @@ attempts to create two mutable references to s will fail:
 https://doc.rust-lang.org/stable/book/ch15-05-interior-mutability.html ,
 RefCell<T> and the Interior Mutability Pattern ,
 
+
+1. Using Cell and RefCell for interior mutability:
+
 use std::cell::RefCell;
-use std::rc::Rc;
-
 fn main() {
-    let s = Rc::new(RefCell::new(String::from("hello")));
+    let s = RefCell::new(String::from("hello"));
 
-    let s1 = Rc::clone(&s); // increases the reference count
-    let s2 = Rc::clone(&s); // increases the reference count
-
-    // These must be in separate scopes or explicitly dropped
     {
-        let mut r1 = s1.borrow_mut();
+        let mut r1 = s.borrow_mut();
         r1.push_str(" world");
     } // r1 goes out of scope here
 
     {
-        let mut r2 = s2.borrow_mut();
+        let mut r2 = s.borrow_mut();
         r2.push_str(" again!");
     }
 
-    println!("{}", s.borrow()); // prints "hello world again!"
+    println!("{}", s.borrow());
+}
+
+
+2. Using Rc<RefCell<T>> for shared ownership with mutability:
+
+use std::rc::Rc;
+use std::cell::RefCell;
+fn main() {
+    let s = Rc::new(RefCell::new(String::from("hello")));
+
+    let r1 = Rc::clone(&s);
+    let r2 = Rc::clone(&s);
+
+    r1.borrow_mut().push_str(" world");
+    r2.borrow_mut().push_str(" again!");
+
+    println!("{}", s.borrow());
+}
+
+
+3. Using Arc<Mutex<T>> for thread-safe shared mutability:
+
+use std::sync::{Arc, Mutex};
+use std::thread;
+fn main() {
+    let s = Arc::new(Mutex::new(String::from("hello")));
+
+    let s1 = Arc::clone(&s);
+    let s2 = Arc::clone(&s);
+
+    let handle1 = thread::spawn(move || {
+        let mut s = s1.lock().unwrap();
+        s.push_str(" world");
+    });
+
+    let handle2 = thread::spawn(move || {
+        let mut s = s2.lock().unwrap();
+        s.push_str(" again!");
+    });
+
+    handle1.join().unwrap();
+    handle2.join().unwrap();
+
+    println!("{}", s.lock().unwrap());
 }
 
 

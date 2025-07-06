@@ -1197,6 +1197,7 @@ fn main() {
 
 // do not do random access index or slicing in string slice directly.
 // convert string slice to Vec.
+// handle utf unicode string.
 
 fn main() {
     // let hello = "Здравствуйте";
@@ -1770,18 +1771,40 @@ you can have either one mutable reference or any number of immutable references.
 
 index is checked on array, vector, HashMap:
 
+
 3.2, Array:
 
-check that the index of array, and panic on invalid index.
-index out of bounds: the len is 4 but the index is 10.
+Rust will check that the index you’ve specified is less than the array length.
+If the index is greater than or equal to the length, Rust will panic. This
+check has to happen at runtime, especially in this case, because the compiler
+can’t possibly know what value a user will enter when they run the code later.
+
+This is an example of Rust’s memory safety principles in action.
+
 
 8.1, Vector:
+
+the first [] method will cause the program to panic because it references a
+nonexistent element. This method is best used when you want your program to
+crash if there’s an attempt to access an element past the end of the vector.
+
+When the get method is passed an index that is outside the vector, it returns
+None without panicking.
+
+the index could be coming from a person entering a number. If they accidentally
+enter a number that’s too large and the program gets a None value, you could
+tell the user how many items are in the current vector and give them another
+chance to enter a valid value.
 
 
 8.3, HashMap:
 
 Hash maps are useful when you want to look up data not by using an index,
 as you can with vectors, but by using a key that can be of any type.
+
+fn index(&self, key: &Q) -> &V
+Returns a reference to the value corresponding to the supplied key.
+Panics if the key is not present in the HashMap. (or BTreeMap)
 
 
 ---
@@ -2081,6 +2104,31 @@ elsewhere.
 
 String literals, for example, are stored in the program’s binary and are
 therefore string slices.
+
+
+---
+
+
+string slice to library String type:
+    let mystring = String::from("abc");
+    let mystring = "abc".to_string();
+
+library String type to string slice:
+    let myslice = &mystring[..];
+    let myslice = &mystring;
+
+fn first_word(s: &String) -> &str { // no,
+
+A more experienced Rustacean would write the signature shown in Listing 4-9
+instead because it allows us to use the same function on both &String values
+and &str values.
+
+fn first_word(s: &str) -> &str { // ok, better
+// Listing 4-9: Improving the first_word function by using a string slice for
+the type of the s parameter
+
+If we have a string slice, we can pass that directly. If we have a String, we
+can pass a slice of the String or a reference to the String.
 
 
 ---

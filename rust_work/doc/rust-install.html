@@ -2086,6 +2086,36 @@ therefore string slices.
 ---
 
 
+// Fibonacci sequence
+fn fib(n: i32) -> i32 {
+    if n == 0 {
+        0
+    } else if n == 1 {
+        1
+    } else {
+        let (mut a, mut b) = (0, 1);
+        for _ in 1..n {
+            (a, b) = (b, a + b);
+        }
+        b
+    }
+}
+
+fn main() {
+    let n = 20;
+    for i in 0..n {
+        print!("{}: {}, ", i, fib(i));
+    }
+    println!("{}", "\n");
+}
+
+// 0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89,
+// 144, 233, 377, 610, 987, 1597, 2584, 4181,
+
+
+---
+
+
 
 
 

@@ -702,32 +702,71 @@ expects a Display implementation for &str.
 ---
 
 
+// std::any::type_name_of_val,
+
+fn main() {
+    let v = vec![1, 2, 3];
+    let a = [1, 2, 3];
+    let s = "abc".to_string();
+    let rv = &v;
+    let ra = &a;
+    let rs = &s;
+
+    dbg!(format_args!("{}", std::any::type_name_of_val(&v)));
+    dbg!(format_args!("{}", std::any::type_name_of_val(&a)));
+    dbg!(format_args!("{}", std::any::type_name_of_val(&s)));
+    dbg!(format_args!("{}", std::any::type_name_of_val(&rv)));
+    dbg!(format_args!("{}", std::any::type_name_of_val(&ra)));
+    dbg!(format_args!("{}", std::any::type_name_of_val(&rs)));
+    dbg!(format_args!("{}", std::any::type_name_of_val(&v[..])));
+    dbg!(format_args!("{}", std::any::type_name_of_val(&a[..])));
+    dbg!(format_args!("{}", std::any::type_name_of_val(&s[..])));
+
+}
+
+/*
+
+[src/main.rs:9:5] format_args!("{}", std::any::type_name_of_val(&v)) = alloc::vec::Vec<i32>
+[src/main.rs:10:5] format_args!("{}", std::any::type_name_of_val(&a)) = [i32; 3]
+[src/main.rs:11:5] format_args!("{}", std::any::type_name_of_val(&s)) = alloc::string::String
+[src/main.rs:12:5] format_args!("{}", std::any::type_name_of_val(&rv)) = &alloc::vec::Vec<i32>
+[src/main.rs:13:5] format_args!("{}", std::any::type_name_of_val(&ra)) = &[i32; 3]
+[src/main.rs:14:5] format_args!("{}", std::any::type_name_of_val(&rs)) = &alloc::string::String
+[src/main.rs:15:5] format_args!("{}", std::any::type_name_of_val(&v[..])) = [i32]
+[src/main.rs:16:5] format_args!("{}", std::any::type_name_of_val(&a[..])) = [i32]
+[src/main.rs:17:5] format_args!("{}", std::any::type_name_of_val(&s[..])) = str
+
+*/
+
+
 // use it like the println! macro, so both work without taking ownership.
 // type_name2!(text)
 // type_name2!(&text)
 
-macro_rules! type_name2 {
-    ($arg:expr) => {{
-        fn type_name2<T: ?Sized>(_: &T) -> &str {
-            std::any::type_name::<T>()
-        }
-        type_name2(&$arg)
-    }};
-}
+// macro_rules! type_name2 {
+//     ($arg:expr) => {{
+//         fn type_name2<T: ?Sized>(_: &T) -> &str {
+//             std::any::type_name::<T>()
+//         }
+//         type_name2(&$arg)
+//     }};
+// }
+
 
 fn main() {
     let v = vec![1, 2, 3];
     let a = [1, 2, 3];
 
-    dbg!(format_args!("{}", type_name2!(v)));
-    dbg!(format_args!("{}", type_name2!(a)));
-    dbg!(format_args!("{}", type_name2!(&v)));
-    dbg!(format_args!("{}", type_name2!(&a)));
-    dbg!(format_args!("{}", type_name2!(&v[..])));
-    dbg!(format_args!("{}", type_name2!(&a[..])));
+    // dbg!(format_args!("{}", type_name2!(v)));
+    // dbg!(format_args!("{}", type_name2!(a)));
+    // dbg!(format_args!("{}", type_name2!(&v)));
+    // dbg!(format_args!("{}", type_name2!(&a)));
+    // dbg!(format_args!("{}", type_name2!(&v[..])));
+    // dbg!(format_args!("{}", type_name2!(&a[..])));
 
-    dbg!(format_args!("{}", type_name2!(v[..]))); // ?Sized
-    dbg!(format_args!("{}", type_name2!(a[..]))); // ?Sized
+    // dbg!(format_args!("{}", type_name2!(v[..]))); // ?Sized
+    // dbg!(format_args!("{}", type_name2!(a[..]))); // ?Sized
+
 
     let a2 = a;
     let v2 = v;
@@ -2012,6 +2051,36 @@ fn main() {
 
     println!("{}", s.lock().unwrap());
 }
+
+
+---
+
+
+https://doc.rust-lang.org/book/ch04-03-slices.html ,
+
+String Slices ,
+let world = &s[6..11]; ,
+
+world would be a slice that contains a pointer to the byte at index 6 of s with
+a length value of 5.
+
+The type that signifies “string slice” is written as &str ,
+
+String Literals as Slices ,
+let s = "Hello, world!";
+The type of s here is &str ,
+
+
+https://doc.rust-lang.org/book/ch08-02-strings.html ,
+
+Rust has only one string type in the core language,
+which is the string slice str that is usually seen in its borrowed form &str .
+
+string slices, which are references to some UTF-8 encoded string data stored
+elsewhere.
+
+String literals, for example, are stored in the program’s binary and are
+therefore string slices.
 
 
 ---

@@ -2164,6 +2164,51 @@ fn main() {
 ---
 
 
+10.2:
+Traits: Defining Shared Behavior
+
+// c++ class with virtual function.
+A trait defines the functionality a particular type has and can share with
+other types. We can use traits to define shared behavior in an abstract way.
+
+// c++ template.
+We can use trait bounds to specify that a generic type can be any type that has
+certain behavior.
+
+
+---
+
+
+15:
+Smart Pointers:
+
+Box<T>:
+// c++ std::unique_ptr.
+When a Box<T> value goes out of scope, the heap data that the box is pointing
+to is cleaned up as well because of the Drop trait implementation.
+
+// self referential struct in c,c++ through pointer to self.
+// struct node { node *next; }
+Enabling Recursive Types with Boxes.
+
+
+Rc<T>:
+a reference counting type that enables multiple ownership;
+// c++ std::shared_ptr.
+
+.clone()
+
+
+RefCell<T>:
+Interior mutability.
+
+borrow(), Ref<T>,
+borrow_mut(), RefMut<T>,
+
+
+---
+
+
 
 
 
